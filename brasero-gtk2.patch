@@ -1,0 +1,3575 @@
+Compile brasero against gtk2
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -32,11 +32,11 @@ DISTCLEANFILES = \
+ 	intltool-extract \
+ 	intltool-merge \
+ 	intltool-update	\
+-	libbrasero-media3.pc	\
+-	libbrasero-burn3.pc
++	libbrasero-media2.pc	\
++	libbrasero-burn2.pc
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+-pkgconfig_DATA = libbrasero-media3.pc libbrasero-burn3.pc
++pkgconfig_DATA = libbrasero-media2.pc libbrasero-burn2.pc
+ 
+ dist-hook:
+ 	@if test -d "$(srcdir)/.git"; \
+--- a/nautilus/Makefile.am
++++ b/nautilus/Makefile.am
+@@ -47,9 +47,9 @@ libnautilus_brasero_extension_la_SOURCES = 	\
+ 
+ libnautilus_brasero_extension_la_LIBADD =	\
+ 	$(NAUTILUS_EXTENSION_LIBS)		\
+-	../libbrasero-utils/libbrasero-utils3.la	\
+-	../libbrasero-media/libbrasero-media3.la	\
+-	../libbrasero-burn/libbrasero-burn3.la
++	../libbrasero-utils/libbrasero-utils2.la	\
++	../libbrasero-media/libbrasero-media2.la	\
++	../libbrasero-burn/libbrasero-burn2.la
+ 	
+ libnautilus_brasero_extension_la_LDFLAGS = $(module_flags)
+ 
+--- a/nautilus/nautilus-burn-bar.c
++++ b/nautilus/nautilus-burn-bar.c
+@@ -50,7 +50,7 @@ enum {
+ 
+ static guint           signals [LAST_SIGNAL] = { 0, };
+ 
+-G_DEFINE_TYPE (NautilusDiscBurnBar, nautilus_disc_burn_bar, GTK_TYPE_BOX)
++G_DEFINE_TYPE (NautilusDiscBurnBar, nautilus_disc_burn_bar, GTK_TYPE_HBOX)
+ 
+ const gchar *
+ nautilus_disc_burn_bar_get_icon (NautilusDiscBurnBar *bar)
+--- a/nautilus/nautilus-burn-bar.h
++++ b/nautilus/nautilus-burn-bar.h
+@@ -38,13 +38,13 @@ typedef struct NautilusDiscBurnBarPrivate NautilusDiscBurnBarPrivate;
+ 
+ typedef struct
+ {
+-        GtkBox                     box;
++        GtkHBox                 box;
+         NautilusDiscBurnBarPrivate *priv;
+ } NautilusDiscBurnBar;
+ 
+ typedef struct
+ {
+-        GtkBoxClass          parent_class;
++        GtkHBoxClass            parent_class;
+ 
+ 	void (* title_changed) (NautilusDiscBurnBar *bar);
+ 	void (* icon_changed)  (NautilusDiscBurnBar *bar);
+--- a/configure.ac
++++ b/configure.ac
+@@ -220,11 +220,11 @@
+ # GTK+ stuff (taken and adapted from empathy)
+ #
+ 
+-GTK_REQUIRED=3.0.0
++GTK_REQUIRED=2.0.0
+ 
+ PKG_CHECK_MODULES([BRASERO_GTK],	\
+-		  gtk+-3.0 >= $GTK_REQUIRED	\
+-		  gdk-x11-3.0)
++		  gtk+-2.0 >= $GTK_REQUIRED	\
++		  gdk-x11-2.0)
+ 
+ AC_SUBST(BRASERO_GTK_CFLAGS)
+ AC_SUBST(BRASERO_GTK_LIBS)
+@@ -247,7 +247,7 @@
+ 
+ PKG_CHECK_MODULES(BRASERO_CANBERRA,
+ 	      libcanberra >= $CANBERRA_REQUIRED
+-	      libcanberra-gtk3 >= $CANBERRA_REQUIRED)
++	      libcanberra-gtk >= $CANBERRA_REQUIRED)
+ 
+ AC_SUBST(BRASERO_CANBERRA_CFLAGS)
+ AC_SUBST(BRASERO_CANBERRA_LIBS)
+@@ -295,7 +295,7 @@ AM_CONDITIONAL(BUILD_NAUTILUS, test x"$build_nautilus" = "xyes")
+ # Installation path for plugins
+ #
+ 
+-BRASERO_PLUGIN_DIRECTORY=${libdir}/brasero3/plugins
++BRASERO_PLUGIN_DIRECTORY=${libdir}/brasero2/plugins
+ AC_SUBST(BRASERO_PLUGIN_DIRECTORY)
+ 
+ dnl ****************check for libburn (optional)**************
+@@ -605,8 +605,8 @@ plugins/local-track/Makefile
+ plugins/vcdimager/Makefile
+ po/Makefile.in
+ src/Makefile
+-libbrasero-media3.pc
+-libbrasero-burn3.pc
++libbrasero-media2.pc
++libbrasero-burn2.pc
+ ])
+ 
+ AC_OUTPUT
+@@ -619,7 +619,7 @@ echo "----------------------------------"
+ dnl 	Build libnotify support : ${build_libnotify}
+ 
+ echo "Version: $BRASERO_VERSION
+-	Using GTK+ 3
++	Using GTK+ 2
+ 	Update caches: ${enable_caches}
+ 	Build Nautilus extension : ${build_nautilus}
+ 	Build inotify: ${enable_inotify}
+--- a/libbrasero-burn/Makefile.am
++++ b/libbrasero-burn/Makefile.am
+@@ -37,7 +37,7 @@ libbrasero-marshal.h: libbrasero-marshal.list
+ libbrasero-marshal.c: libbrasero-marshal.h
+ 	( $(GLIB_GENMARSHAL) --prefix=brasero_marshal $(srcdir)/libbrasero-marshal.list --body --header > libbrasero-marshal.c )
+ 
+-headerdir=$(includedir)/brasero3
++headerdir=$(includedir)/brasero2
+ header_HEADERS =	brasero-tags.h						\
+ 		brasero-enums.h						\
+ 		brasero-error.h						\
+@@ -63,11 +63,11 @@ header_HEADERS =	brasero-tags.h						\
+ 		brasero-blank-dialog.h
+ 
+ lib_LTLIBRARIES = \
+-	libbrasero-burn3.la
++	libbrasero-burn2.la
+ 
+-libbrasero_burn3_la_LIBADD =					\
+-	../libbrasero-media/libbrasero-media3.la			\
+-	../libbrasero-utils/libbrasero-utils3.la			\
++libbrasero_burn2_la_LIBADD =					\
++	../libbrasero-media/libbrasero-media2.la			\
++	../libbrasero-utils/libbrasero-utils2.la			\
+ 	$(BRASERO_GLIB_LIBS)					\
+ 	$(BRASERO_GTHREAD_LIBS)					\
+ 	$(BRASERO_GMODULE_LIBS)					\
+@@ -78,13 +78,13 @@ libbrasero_burn3_la_LIBADD =					\
+ 	$(BRASERO_CANBERRA_LIBS)				\
+ 	$(LIBM)
+ 
+-libbrasero_burn3_la_LDFLAGS =					\
++libbrasero_burn2_la_LDFLAGS =					\
+ 	-version-info $(LIBBRASERO_LT_VERSION)			\
+ 	-no-undefined						\
+ 	-export-dynamic
+ #	-export-symbols ./libbrasero-burn.symbols
+ 
+-libbrasero_burn3_la_SOURCES = 		\
++libbrasero_burn2_la_SOURCES = 		\
+ 	libbrasero-marshal.c		\
+ 	libbrasero-marshal.h		\
+ 	brasero-tool-dialog.c         \
+@@ -203,7 +203,7 @@ libbrasero_burn3_la_SOURCES = 		\
+ 	brasero-plugin-private.h                 
+ 
+ if BUILD_INOTIFY
+-libbrasero_burn3_la_SOURCES += brasero-file-monitor.c brasero-file-monitor.h
++libbrasero_burn2_la_SOURCES += brasero-file-monitor.c brasero-file-monitor.h
+ endif
+ 
+ EXTRA_DIST +=			\
+@@ -239,16 +239,16 @@ introspected_source = \
+ 	brasero-tool-dialog.h brasero-tool-dialog.c \
+ 	brasero-sum-dialog.h brasero-sum-dialog.c
+ 
+-BraseroBurn-3.@TYPELIB_MIN_VERSION@.gir: Makefile libbrasero-burn3.la
+-BraseroBurn_3_@TYPELIB_MIN_VERSION@_gir_NAMESPACE = BraseroBurn
+-BraseroBurn_3_@TYPELIB_MIN_VERSION@_gir_VERSION = 3.@TYPELIB_MIN_VERSION@
+-BraseroBurn_3_@TYPELIB_MIN_VERSION@_gir_INCLUDES = Gtk-3.0
+-BraseroBurn_3_@TYPELIB_MIN_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS)
+-BraseroBurn_3_@TYPELIB_MIN_VERSION@_gir_LIBS = libbrasero-burn3.la
+-BraseroBurn_3_@TYPELIB_MIN_VERSION@_gir_FILES = $(introspected_source)
+-BraseroBurn_3_@TYPELIB_MIN_VERSION@_gir_SCANNERFLAGS = --identifier-prefix=Brasero --symbol-prefix=brasero
++BraseroBurn-2.@TYPELIB_MIN_VERSION@.gir: Makefile libbrasero-burn2.la
++BraseroBurn_2_@TYPELIB_MIN_VERSION@_gir_NAMESPACE = BraseroBurn
++BraseroBurn_2_@TYPELIB_MIN_VERSION@_gir_VERSION = 2.@TYPELIB_MIN_VERSION@
++BraseroBurn_2_@TYPELIB_MIN_VERSION@_gir_INCLUDES = Gtk-2.0
++BraseroBurn_2_@TYPELIB_MIN_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS)
++BraseroBurn_2_@TYPELIB_MIN_VERSION@_gir_LIBS = libbrasero-burn2.la
++BraseroBurn_2_@TYPELIB_MIN_VERSION@_gir_FILES = $(introspected_source)
++BraseroBurn_2_@TYPELIB_MIN_VERSION@_gir_SCANNERFLAGS = --identifier-prefix=Brasero --symbol-prefix=brasero
+ 
+-INTROSPECTION_GIRS += BraseroBurn-3.@TYPELIB_MIN_VERSION@.gir
++INTROSPECTION_GIRS += BraseroBurn-2.@TYPELIB_MIN_VERSION@.gir
+ endif # HAVE_INTROSPECTION	    
+ 
+ girdir = $(datadir)/gir-1.0
+diff --git a/libbrasero-burn3.pc.in b/libbrasero-burn2.pc.in
+rename from libbrasero-burn3.pc.in
+rename to libbrasero-burn2.pc.in
+--- a/libbrasero-burn3.pc.in
++++ b/libbrasero-burn2.pc.in
+@@ -7,6 +7,6 @@
+ Name: libbrasero-burn
+ Description: Brasero Optical Media Burning library
+ Version: @VERSION@
+-Requires: glib-2.0 gthread-2.0 gtk+-3.0
+-Libs: -L${libdir} -lbrasero-burn3
+-Cflags: -I${includedir}/brasero3
++Requires: glib-2.0 gthread-2.0 gtk+-2.0
++Libs: -L${libdir} -lbrasero-burn2
++Cflags: -I${includedir}/brasero2
+--- a/libbrasero-media/Makefile.am
++++ b/libbrasero-media/Makefile.am
+@@ -27,7 +27,7 @@ libbrasero-marshal.h: libbrasero-marshal.list
+ libbrasero-marshal.c: libbrasero-marshal.h
+ 	( $(GLIB_GENMARSHAL) --prefix=brasero_marshal $(srcdir)/libbrasero-marshal.list --body --header > libbrasero-marshal.c )
+ 
+-headerdir = $(includedir)/brasero3
++headerdir = $(includedir)/brasero2
+ header_HEADERS = \
+ 	brasero-drive.h			\
+ 	brasero-medium-monitor.h	\
+@@ -38,9 +38,9 @@ header_HEADERS = \
+ 	brasero-medium-selection.h	\
+ 	brasero-drive-selection.h
+ 
+-lib_LTLIBRARIES = libbrasero-media3.la
++lib_LTLIBRARIES = libbrasero-media2.la
+ 
+-libbrasero_media3_la_LIBADD = \
++libbrasero_media2_la_LIBADD = \
+ 	$(BRASERO_GLIB_LIBS) 		\
+ 	$(BRASERO_GMODULE_EXPORT_LIBS) 	\
+ 	$(BRASERO_GTHREAD_LIBS)		\
+@@ -48,13 +48,13 @@ libbrasero_media3_la_LIBADD = \
+ 	$(BRASERO_GTK_LIBS) 		\
+ 	$(BRASERO_SCSI_LIBS)
+ 
+-libbrasero_media3_la_LDFLAGS =					\
++libbrasero_media2_la_LDFLAGS =					\
+ 	-version-info $(LIBBRASERO_LT_VERSION)			\
+ 	-no-undefined
+ 	$(AM_LDFLAGS)
+ #	-export-symbols ./libbrasero-media.symbols
+ 
+-libbrasero_media3_la_SOURCES =		\
++libbrasero_media2_la_SOURCES =		\
+ 	libbrasero-marshal.c		\
+ 	libbrasero-marshal.h		\
+ 	brasero-drive.h			\
+@@ -137,22 +137,22 @@ libbrasero_media3_la_SOURCES =		\
+ 
+ # FreeBSD's SCSI CAM interface
+ if HAVE_CAM_LIB_H
+-libbrasero_media3_la_SOURCES += scsi-cam.c
++libbrasero_media2_la_SOURCES += scsi-cam.c
+ endif
+ 
+ # Linux's SCSI CAM interface
+ if HAVE_SG_IO_HDR_T
+-libbrasero_media3_la_SOURCES += scsi-sg.c
++libbrasero_media2_la_SOURCES += scsi-sg.c
+ endif
+ 
+ # NetBSD's scsi(4)
+ if HAVE_SCSIIO_H
+-libbrasero_media3_la_SOURCES += scsi-netbsd.c
++libbrasero_media2_la_SOURCES += scsi-netbsd.c
+ endif
+ 
+ # Solaris's USCSI interface
+ if HAVE_USCSI_H
+-libbrasero_media3_la_SOURCES += scsi-uscsi.c
++libbrasero_media2_la_SOURCES += scsi-uscsi.c
+ endif
+ 
+ include $(INTROSPECTION_MAKEFILE)
+@@ -178,16 +178,16 @@ introspected_source = \
+ 	brasero-drive-selection.h	\
+ 	brasero-drive-selection.c
+ 
+-BraseroMedia-3.@TYPELIB_MIN_VERSION@.gir: Makefile libbrasero-media3.la
+-BraseroMedia_3_@TYPELIB_MIN_VERSION@_gir_NAMESPACE = BraseroMedia
+-BraseroMedia_3_@TYPELIB_MIN_VERSION@_gir_VERSION = 3.@TYPELIB_MIN_VERSION@
+-BraseroMedia_3_@TYPELIB_MIN_VERSION@_gir_INCLUDES = Gtk-3.0
+-BraseroMedia_3_@TYPELIB_MIN_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS)
+-BraseroMedia_3_@TYPELIB_MIN_VERSION@_gir_LIBS = libbrasero-media3.la
+-BraseroMedia_3_@TYPELIB_MIN_VERSION@_gir_FILES = $(introspected_source)
+-BraseroMedia_3_@TYPELIB_MIN_VERSION@_gir_SCANNERFLAGS = --identifier-prefix=Brasero --symbol-prefix=brasero
++BraseroMedia-2.@TYPELIB_MIN_VERSION@.gir: Makefile libbrasero-media2.la
++BraseroMedia_2_@TYPELIB_MIN_VERSION@_gir_NAMESPACE = BraseroMedia
++BraseroMedia_2_@TYPELIB_MIN_VERSION@_gir_VERSION = 2.@TYPELIB_MIN_VERSION@
++BraseroMedia_2_@TYPELIB_MIN_VERSION@_gir_INCLUDES = Gtk-2.0
++BraseroMedia_2_@TYPELIB_MIN_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS)
++BraseroMedia_2_@TYPELIB_MIN_VERSION@_gir_LIBS = libbrasero-media2.la
++BraseroMedia_2_@TYPELIB_MIN_VERSION@_gir_FILES = $(introspected_source)
++BraseroMedia_2_@TYPELIB_MIN_VERSION@_gir_SCANNERFLAGS = --identifier-prefix=Brasero --symbol-prefix=brasero
+ 
+-INTROSPECTION_GIRS += BraseroMedia-3.@TYPELIB_MIN_VERSION@.gir
++INTROSPECTION_GIRS += BraseroMedia-2.@TYPELIB_MIN_VERSION@.gir
+ endif # HAVE_INTROSPECTION
+ 
+ girdir = $(datadir)/gir-1.0
+diff --git a/libbrasero-media3.pc.in b/libbrasero-media2.pc.in
+rename from libbrasero-media3.pc.in
+rename to libbrasero-media2.pc.in
+--- a/libbrasero-media3.pc.in
++++ b/libbrasero-media2.pc.in
+@@ -7,6 +7,6 @@
+ Name: libbrasero-media
+ Description: Brasero Optical Media library
+ Version: @VERSION@
+-Requires: glib-2.0 gthread-2.0 gtk+-3.0
+-Libs: -L${libdir} -lbrasero-media3
+-Cflags: -I${includedir}/brasero3
++Requires: glib-2.0 gthread-2.0 gtk+-2.0
++Libs: -L${libdir} -lbrasero-media2
++Cflags: -I${includedir}/brasero2
+--- a/libbrasero-utils/Makefile.am
++++ b/libbrasero-utils/Makefile.am
+@@ -18,9 +18,9 @@ AM_CPPFLAGS = \
+ 
+ 
+ lib_LTLIBRARIES = \
+-	libbrasero-utils3.la
++	libbrasero-utils2.la
+ 
+-libbrasero_utils3_la_LIBADD =					\
++libbrasero_utils2_la_LIBADD =					\
+ 	$(BRASERO_GLIB_LIBS)					\
+ 	$(BRASERO_GIO_LIBS)		\
+ 	$(BRASERO_GSTREAMER_LIBS)	\
+@@ -28,12 +28,12 @@ libbrasero_utils3_la_LIBADD =					\
+ 	$(BRASERO_PL_PARSER_LIBS)	\
+ 	$(BRASERO_GTK_LIBS)
+ 
+-libbrasero_utils3_la_LDFLAGS =					\
++libbrasero_utils2_la_LDFLAGS =					\
+ 	-version-info $(LIBBRASERO_LT_VERSION)			\
+ 	-no-undefined
+ #	-export-symbols ./libbrasero-utils.symbols
+ 
+-libbrasero_utils3_la_SOURCES =		\
++libbrasero_utils2_la_SOURCES =		\
+ 	brasero-disc-message.c        \
+ 	brasero-disc-message.h        \
+ 	brasero-misc.c        \
+--- a/plugins/audio2cue/Makefile.am
++++ b/plugins/audio2cue/Makefile.am
+@@ -18,7 +18,7 @@ AM_CPPFLAGS = \
+ audio2cuedir = $(BRASERO_PLUGIN_DIRECTORY)
+ audio2cue_LTLIBRARIES = libbrasero-audio2cue.la
+ libbrasero_audio2cue_la_SOURCES = burn-audio2cue.c
+-libbrasero_audio2cue_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_audio2cue_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_audio2cue_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/cdrdao/Makefile.am
++++ b/plugins/cdrdao/Makefile.am
+@@ -18,7 +18,7 @@ AM_CPPFLAGS = \
+ cdrdaodir = $(BRASERO_PLUGIN_DIRECTORY)
+ cdrdao_LTLIBRARIES = libbrasero-cdrdao.la
+ libbrasero_cdrdao_la_SOURCES = burn-cdrdao.c 
+-libbrasero_cdrdao_la_LIBADD = ../../libbrasero-media/libbrasero-media3.la ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_cdrdao_la_LIBADD = ../../libbrasero-media/libbrasero-media2.la ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_cdrdao_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/cdrkit/Makefile.am
++++ b/plugins/cdrkit/Makefile.am
+@@ -19,7 +19,7 @@ wodimdir = $(BRASERO_PLUGIN_DIRECTORY)
+ wodim_LTLIBRARIES = libbrasero-wodim.la
+ libbrasero_wodim_la_SOURCES = burn-wodim.c \
+ 	burn-cdrkit.h 
+-libbrasero_wodim_la_LIBADD = ../../libbrasero-media/libbrasero-media3.la ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_wodim_la_LIBADD = ../../libbrasero-media/libbrasero-media2.la ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_wodim_la_LDFLAGS = -module -avoid-version
+ 
+ #genisoimage
+@@ -27,7 +27,7 @@ genisoimagedir = $(BRASERO_PLUGIN_DIRECTORY)
+ genisoimage_LTLIBRARIES = libbrasero-genisoimage.la
+ libbrasero_genisoimage_la_SOURCES = burn-genisoimage.c \
+ 	burn-cdrkit.h 
+-libbrasero_genisoimage_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_genisoimage_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_genisoimage_la_LDFLAGS = -module -avoid-version
+ 
+ #readom
+@@ -35,7 +35,7 @@ readomdir = $(BRASERO_PLUGIN_DIRECTORY)
+ readom_LTLIBRARIES = libbrasero-readom.la
+ libbrasero_readom_la_SOURCES = burn-readom.c \
+ 	burn-cdrkit.h 
+-libbrasero_readom_la_LIBADD = ../../libbrasero-media/libbrasero-media3.la ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_readom_la_LIBADD = ../../libbrasero-media/libbrasero-media2.la ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_readom_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/cdrtools/Makefile.am
++++ b/plugins/cdrtools/Makefile.am
+@@ -19,7 +19,7 @@ cdrecorddir = $(BRASERO_PLUGIN_DIRECTORY)
+ cdrecord_LTLIBRARIES = libbrasero-cdrecord.la
+ libbrasero_cdrecord_la_SOURCES = burn-cdrecord.c \
+ 	burn-cdrtools.h 
+-libbrasero_cdrecord_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_cdrecord_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_cdrecord_la_LDFLAGS = -module -avoid-version
+ 
+ #mkisofs
+@@ -27,7 +27,7 @@ mkisofsdir = $(BRASERO_PLUGIN_DIRECTORY)
+ mkisofs_LTLIBRARIES = libbrasero-mkisofs.la
+ libbrasero_mkisofs_la_SOURCES = burn-mkisofs.c \
+ 	burn-cdrtools.h 
+-libbrasero_mkisofs_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_mkisofs_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_mkisofs_la_LDFLAGS = -module -avoid-version
+ 
+ #readcd
+@@ -35,14 +35,14 @@ readcddir = $(BRASERO_PLUGIN_DIRECTORY)
+ readcd_LTLIBRARIES = libbrasero-readcd.la
+ libbrasero_readcd_la_SOURCES = burn-readcd.c \
+ 	burn-cdrtools.h 
+-libbrasero_readcd_la_LIBADD = ../../libbrasero-media/libbrasero-media3.la ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_readcd_la_LIBADD = ../../libbrasero-media/libbrasero-media2.la ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_readcd_la_LDFLAGS = -module -avoid-version
+ 
+ #cdda2wav
+ cdda2wavdir = $(BRASERO_PLUGIN_DIRECTORY)
+ cdda2wav_LTLIBRARIES = libbrasero-cdda2wav.la
+ libbrasero_cdda2wav_la_SOURCES = burn-cdda2wav.c burn-cdrtools.h 
+-libbrasero_cdda2wav_la_LIBADD = ../../libbrasero-media/libbrasero-media3.la ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_cdda2wav_la_LIBADD = ../../libbrasero-media/libbrasero-media2.la ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_cdda2wav_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/checksum/Makefile.am
++++ b/plugins/checksum/Makefile.am
+@@ -20,7 +20,7 @@ checksum_LTLIBRARIES = libbrasero-checksum.la
+ libbrasero_checksum_la_SOURCES = burn-checksum-image.c	
+ 
+ libbrasero_checksum_la_LDFLAGS = -module -avoid-version
+-libbrasero_checksum_la_LIBADD = ../../libbrasero-media/libbrasero-media3.la ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_checksum_la_LIBADD = ../../libbrasero-media/libbrasero-media2.la ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ 
+ checksumfiledir = $(BRASERO_PLUGIN_DIRECTORY)
+ checksumfile_LTLIBRARIES = libbrasero-checksum-file.la
+@@ -29,6 +29,6 @@ libbrasero_checksum_file_la_SOURCES = burn-checksum-files.c	\
+ 				      burn-volume-read.h
+ 
+ libbrasero_checksum_file_la_LDFLAGS = -module -avoid-version
+-libbrasero_checksum_file_la_LIBADD = ../../libbrasero-media/libbrasero-media3.la ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_GTK_LIBS)
++libbrasero_checksum_file_la_LIBADD = ../../libbrasero-media/libbrasero-media2.la ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_GTK_LIBS)
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/dvdauthor/Makefile.am
++++ b/plugins/dvdauthor/Makefile.am
+@@ -19,7 +19,7 @@ dvdauthordir = $(BRASERO_PLUGIN_DIRECTORY)
+ dvdauthor_LTLIBRARIES = libbrasero-dvdauthor.la
+ 
+ libbrasero_dvdauthor_la_SOURCES = burn-dvdauthor.c 
+-libbrasero_dvdauthor_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_LIBXML_LIBS)
++libbrasero_dvdauthor_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_LIBXML_LIBS)
+ libbrasero_dvdauthor_la_LDFLAGS = -module -avoid-version
+ 
+ 
+--- a/plugins/dvdcss/Makefile.am
++++ b/plugins/dvdcss/Makefile.am
+@@ -17,7 +17,7 @@ plugindir = $(BRASERO_PLUGIN_DIRECTORY)
+ plugin_LTLIBRARIES = libbrasero-dvdcss.la
+ libbrasero_dvdcss_la_SOURCES = burn-dvdcss.c \
+ 	burn-dvdcss-private.h 
+-libbrasero_dvdcss_la_LIBADD = ../../libbrasero-media/libbrasero-media3.la ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_GMODULE_LIBS)
++libbrasero_dvdcss_la_LIBADD = ../../libbrasero-media/libbrasero-media2.la ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_GMODULE_LIBS)
+ libbrasero_dvdcss_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/growisofs/Makefile.am
++++ b/plugins/growisofs/Makefile.am
+@@ -19,14 +19,14 @@ growisofsdir = $(BRASERO_PLUGIN_DIRECTORY)
+ growisofs_LTLIBRARIES = libbrasero-growisofs.la
+ libbrasero_growisofs_la_SOURCES = burn-growisofs.c \
+ 	burn-growisofs-common.h 
+-libbrasero_growisofs_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_growisofs_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_growisofs_la_LDFLAGS = -module -avoid-version
+ 
+ #dvdrwformat
+ dvdrwformatdir = $(BRASERO_PLUGIN_DIRECTORY)
+ dvdrwformat_LTLIBRARIES = libbrasero-dvdrwformat.la
+ libbrasero_dvdrwformat_la_SOURCES = burn-dvd-rw-format.c 
+-libbrasero_dvdrwformat_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS)
++libbrasero_dvdrwformat_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS)
+ libbrasero_dvdrwformat_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/libburnia/Makefile.am
++++ b/plugins/libburnia/Makefile.am
+@@ -23,7 +23,7 @@ libbrasero_libburn_la_SOURCES = burn-libburn.c 		\
+ 				burn-libburn-common.c	\
+ 				burn-libburn-common.h  \
+ 				burn-libburnia.h 
+-libbrasero_libburn_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_LIBBURNIA_LIBS)
++libbrasero_libburn_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_LIBBURNIA_LIBS)
+ libbrasero_libburn_la_LDFLAGS = -module -avoid-version
+ 
+ #libisofs (apparently libisofs needs one libburn function)
+@@ -32,7 +32,7 @@ libisofs_LTLIBRARIES = libbrasero-libisofs.la
+ libbrasero_libisofs_la_SOURCES = burn-libisofs.c                       \
+ 	burn-libburn-common.c burn-libburn-common.h			\
+ 	burn-libburnia.h 
+-libbrasero_libisofs_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_LIBBURNIA_LIBS)
++libbrasero_libisofs_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_LIBBURNIA_LIBS)
+ libbrasero_libisofs_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/local-track/Makefile.am
++++ b/plugins/local-track/Makefile.am
+@@ -20,7 +20,7 @@ local_trackdir = $(BRASERO_PLUGIN_DIRECTORY)
+ local_track_LTLIBRARIES = libbrasero-local-track.la
+ 
+ libbrasero_local_track_la_SOURCES = burn-local-image.c 
+-libbrasero_local_track_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_GIO_LIBS)
++libbrasero_local_track_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_GIO_LIBS)
+ libbrasero_local_track_la_LDFLAGS = -module -avoid-version
+ 
+ #burn-uri
+@@ -28,7 +28,7 @@ burn_uridir = $(BRASERO_PLUGIN_DIRECTORY)
+ burn_uri_LTLIBRARIES = libbrasero-burn-uri.la
+ 
+ libbrasero_burn_uri_la_SOURCES = burn-uri.c 
+-libbrasero_burn_uri_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_GIO_LIBS)
++libbrasero_burn_uri_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_GIO_LIBS)
+ libbrasero_burn_uri_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/transcode/Makefile.am
++++ b/plugins/transcode/Makefile.am
+@@ -19,21 +19,21 @@ transcodedir = $(BRASERO_PLUGIN_DIRECTORY)
+ transcode_LTLIBRARIES = libbrasero-transcode.la
+ 
+ libbrasero_transcode_la_SOURCES = burn-transcode.c burn-normalize.h 
+-libbrasero_transcode_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_GSTREAMER_LIBS)
++libbrasero_transcode_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_GSTREAMER_LIBS)
+ libbrasero_transcode_la_LDFLAGS = -module -avoid-version
+ 
+ normalizedir = $(BRASERO_PLUGIN_DIRECTORY)
+ normalize_LTLIBRARIES = libbrasero-normalize.la
+ 
+ libbrasero_normalize_la_SOURCES = burn-normalize.c burn-normalize.h
+-libbrasero_normalize_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_GSTREAMER_LIBS)
++libbrasero_normalize_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_GSTREAMER_LIBS)
+ libbrasero_normalize_la_LDFLAGS = -module -avoid-version
+ 
+ vobdir = $(BRASERO_PLUGIN_DIRECTORY)
+ vob_LTLIBRARIES = libbrasero-vob.la
+ 
+ libbrasero_vob_la_SOURCES = burn-vob.c 
+-libbrasero_vob_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_GSTREAMER_LIBS)
++libbrasero_vob_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_GSTREAMER_LIBS)
+ libbrasero_vob_la_LDFLAGS = -module -avoid-version
+ 
+ -include $(top_srcdir)/git.mk
+--- a/plugins/vcdimager/Makefile.am
++++ b/plugins/vcdimager/Makefile.am
+@@ -19,7 +19,7 @@ vcdimagerdir = $(BRASERO_PLUGIN_DIRECTORY)
+ vcdimager_LTLIBRARIES = libbrasero-vcdimager.la
+ 
+ libbrasero_vcdimager_la_SOURCES = burn-vcdimager.c 
+-libbrasero_vcdimager_la_LIBADD = ../../libbrasero-burn/libbrasero-burn3.la $(BRASERO_GLIB_LIBS) $(BRASERO_LIBXML_LIBS)
++libbrasero_vcdimager_la_LIBADD = ../../libbrasero-burn/libbrasero-burn2.la $(BRASERO_GLIB_LIBS) $(BRASERO_LIBXML_LIBS)
+ libbrasero_vcdimager_la_LDFLAGS = -module -avoid-version
+ 
+ 
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -132,9 +132,9 @@ brasero_SOURCES += \
+ endif
+ 
+ brasero_LDADD =						\
+-	$(top_builddir)/libbrasero-media/libbrasero-media3.la	\
+-	$(top_builddir)/libbrasero-burn/libbrasero-burn3.la	\
+-	$(top_builddir)/libbrasero-utils/libbrasero-utils3.la	\
++	$(top_builddir)/libbrasero-media/libbrasero-media2.la	\
++	$(top_builddir)/libbrasero-burn/libbrasero-burn2.la	\
++	$(top_builddir)/libbrasero-utils/libbrasero-utils2.la	\
+ 	$(BRASERO_GLIB_LIBS)		\
+ 	$(BRASERO_GTHREAD_LIBS)				\
+ 	$(BRASERO_GIO_LIBS)		\
+--- a/libbrasero-utils/brasero-disc-message.c
++++ b/libbrasero-utils/brasero-disc-message.c
+@@ -346,7 +349,7 @@ brasero_disc_message_init (BraseroDiscMessage *object)
+ 
+ 	main_box = gtk_info_bar_get_content_area (GTK_INFO_BAR (object));
+ 
+-	priv->text_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
++	priv->text_box = gtk_vbox_new (FALSE, 6);
+ 	gtk_widget_show (priv->text_box);
+ 	gtk_box_pack_start (GTK_BOX (main_box), priv->text_box, FALSE, FALSE, 0);
+ 
+--- a/libbrasero-utils/brasero-io.c
++++ b/libbrasero-utils/brasero-io.c
+@@ -2357,7 +2353,7 @@ static int
+ 		GtkWindow *parent;
+ 
+ 		parent = priv->win_callback (priv->win_user_data);
+-		xid = gdk_x11_window_get_xid (gtk_widget_get_window(GTK_WIDGET (parent)));
++		xid = gdk_x11_drawable_get_xid (GDK_DRAWABLE (gtk_widget_get_window(GTK_WIDGET (parent))));
+ 		return xid;
+ 	}
+ 
+--- a/libbrasero-utils/brasero-jacket-background.c
++++ b/libbrasero-utils/brasero-jacket-background.c
+@@ -201,36 +175,36 @@ brasero_jacket_background_add_filters (BraseroJacketBackground *self)
+ 
+ 	priv = BRASERO_JACKET_BACKGROUND_PRIVATE (object);
+ 
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
++	vbox = gtk_vbox_new (FALSE, 12);
+ 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
+ 	gtk_widget_show (vbox);
+ 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (object))), vbox, TRUE, TRUE, 0);
+ 
+ 	radio = gtk_radio_button_new_with_mnemonic_from_widget (NULL, _("_Color"));
+ 	priv->color_radio = radio;
+ 
+ 	gtk_widget_show (radio);
+ 	gtk_box_pack_start (GTK_BOX (vbox), radio, FALSE, TRUE, 0);
+ 
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
++	hbox = gtk_hbox_new (FALSE, 0);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
+ 
+ 	g_signal_connect (radio,
+ 			  "toggled",
+ 			  G_CALLBACK (brasero_jacket_background_state_changed),
+ 			  hbox);
+ 
+ 	label = gtk_label_new ("\t");
+ 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+ 	gtk_widget_show (label);
+ 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
+ 
+-	vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
++	vbox2 = gtk_vbox_new (FALSE, 6);
+ 	gtk_widget_show (vbox2);
+ 	gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 0);
+ 
+-	hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
++	hbox2 = gtk_hbox_new (FALSE, 12);
+ 	gtk_widget_show (hbox2);
+ 	gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, TRUE, 0);
+ 
+@@ -277,7 +242,7 @@ brasero_jacket_background_init (BraseroJacketBackground *object)
+ 	gtk_widget_show (radio);
+ 	gtk_box_pack_start (GTK_BOX (vbox), radio, FALSE, TRUE, 0);
+ 
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
++	hbox = gtk_hbox_new (FALSE, 0);
+ 	gtk_widget_show (hbox);
+ 	gtk_widget_set_sensitive (hbox, FALSE);
+ 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
+--- a/libbrasero-utils/brasero-jacket-edit.c
++++ b/libbrasero-utils/brasero-jacket-edit.c
+@@ -76,7 +76,7 @@ enum {
+ 	SNAP_NUM_COL
+ };
+ 
+-G_DEFINE_TYPE (BraseroJacketEdit, brasero_jacket_edit, GTK_TYPE_BOX);
++G_DEFINE_TYPE (BraseroJacketEdit, brasero_jacket_edit, GTK_TYPE_VBOX);
+ 
+ static void
+ brasero_jacket_edit_print_page (GtkPrintOperation *operation,
+@@ -233,9 +235,8 @@ brasero_jacket_edit_bold_pressed_cb (GtkToggleToolButton *button,
+ }
+ 
+ static void
+-brasero_jacket_edit_justify (GtkToggleToolButton *button,
+-			     BraseroJacketEdit *self,
+-			     GtkJustification justify)
++brasero_jacket_edit_center_pressed_cb (GtkToggleToolButton *button,
++				       BraseroJacketEdit *self)
+ {
+ 	BraseroJacketEditPrivate *priv;
+ 	GtkTextBuffer *buffer;
+@@ -253,7 +254,7 @@ brasero_jacket_edit_justify (GtkToggleToolButton *button,
+ 
+ 	buffer = brasero_jacket_view_get_active_buffer (BRASERO_JACKET_VIEW (priv->current_view));
+ 	tag = gtk_text_buffer_create_tag (buffer, NULL,
+-					  "justification", justify,
++					  "justification", GTK_JUSTIFY_CENTER,
+ 					  NULL);
+ 
+ 	if (!gtk_text_buffer_get_has_selection (buffer)) {
+@@ -273,24 +274,80 @@ brasero_jacket_edit_justify (GtkToggleToolButton *button,
+ }
+ 
+ static void
+-brasero_jacket_edit_center_pressed_cb (GtkToggleToolButton *button,
+-				       BraseroJacketEdit *self)
+-{
+-	brasero_jacket_edit_justify (button, self,  GTK_JUSTIFY_CENTER);
+-}
+-
+-static void
+ brasero_jacket_edit_right_pressed_cb (GtkToggleToolButton *button,
+ 				      BraseroJacketEdit *self)
+ {
+-	brasero_jacket_edit_justify (button, self, GTK_JUSTIFY_RIGHT);
++	BraseroJacketEditPrivate *priv;
++	GtkTextBuffer *buffer;
++	GtkTextIter start;
++	GtkTextIter end;
++	GtkTextTag *tag;
++
++	priv = BRASERO_JACKET_EDIT_PRIVATE (self);
++	if (!priv->current_view)
++		return;
++
++	if (!gtk_toggle_tool_button_get_active (button))
++		return;
++
++	buffer = brasero_jacket_view_get_active_buffer (BRASERO_JACKET_VIEW (priv->current_view));
++	tag = gtk_text_buffer_create_tag (buffer, NULL,
++					  "justification", GTK_JUSTIFY_RIGHT,
++					  NULL);
++
++	if (!gtk_text_buffer_get_has_selection (buffer)) {
++		GtkTextMark *mark;
++
++		mark = gtk_text_buffer_get_insert (buffer);
++		gtk_text_buffer_get_iter_at_mark (buffer, &start, mark);
++		gtk_text_buffer_get_iter_at_mark (buffer, &end, mark);
++		brasero_jacket_buffer_add_default_tag (BRASERO_JACKET_BUFFER (buffer), tag);
++	}
++	else
++		gtk_text_buffer_get_selection_bounds (buffer, &start, &end);
++
++
++	gtk_text_iter_set_line_index (&start, 0);
++	gtk_text_iter_forward_to_line_end (&end);
++	gtk_text_buffer_apply_tag (buffer, tag, &start, &end);
+ }
+ 
+ static void
+ brasero_jacket_edit_left_pressed_cb (GtkToggleToolButton *button,
+ 				     BraseroJacketEdit *self)
+ {
+-	brasero_jacket_edit_justify (button, self, GTK_JUSTIFY_LEFT);
++	BraseroJacketEditPrivate *priv;
++	GtkTextBuffer *buffer;
++	GtkTextIter start;
++	GtkTextIter end;
++	GtkTextTag *tag;
++
++	priv = BRASERO_JACKET_EDIT_PRIVATE (self);
++	if (!priv->current_view)
++		return;
++
++	if (!gtk_toggle_tool_button_get_active (button))
++		return;
++
++	buffer = brasero_jacket_view_get_active_buffer (BRASERO_JACKET_VIEW (priv->current_view));
++	tag = gtk_text_buffer_create_tag (buffer, NULL,
++					  "justification", GTK_JUSTIFY_LEFT,
++					  NULL);
++
++	if (!gtk_text_buffer_get_has_selection (buffer)) {
++		GtkTextMark *mark;
++
++		mark = gtk_text_buffer_get_insert (buffer);
++		gtk_text_buffer_get_iter_at_mark (buffer, &start, mark);
++		gtk_text_buffer_get_iter_at_mark (buffer, &end, mark);
++		brasero_jacket_buffer_add_default_tag (BRASERO_JACKET_BUFFER (buffer), tag);
++	}
++	else
++		gtk_text_buffer_get_selection_bounds (buffer, &start, &end);
++
++	gtk_text_iter_set_line_index (&start, 0);
++	gtk_text_iter_forward_to_line_end (&end);
++	gtk_text_buffer_apply_tag (buffer, tag, &start, &end);
+ }
+ 
+ static void
+@@ -517,15 +574,12 @@ brasero_jacket_edit_init (BraseroJacketEdit *object)
+ 	GtkWidget *vbox;
+ 	GtkWidget *item;
+ 	GtkWidget *view;
++	GtkStyle *style;
+ 
+ 	priv = BRASERO_JACKET_EDIT_PRIVATE (object);
+ 
+-	gtk_orientable_set_orientation (GTK_ORIENTABLE (object), GTK_ORIENTATION_VERTICAL);
+-
+ 	/* Toolbar */
+ 	toolbar = gtk_toolbar_new ();
+-	gtk_style_context_add_class (gtk_widget_get_style_context (toolbar),
+-				     GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+ 	gtk_widget_show (toolbar);
+ 	gtk_box_pack_start (GTK_BOX (object), toolbar, FALSE, TRUE, 0);
+ 
+@@ -544,7 +598,7 @@ brasero_jacket_edit_init (BraseroJacketEdit *object)
+ 	gtk_toolbar_insert (GTK_TOOLBAR (toolbar), GTK_TOOL_ITEM (item), 0);
+ 
+ 	item = GTK_WIDGET (gtk_tool_button_new (NULL, _("Bac_kground Properties")));
+-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (item), "preferences-desktop-wallpaper");
++	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (item), "background");
+ 	gtk_tool_button_set_use_underline (GTK_TOOL_BUTTON (item), TRUE);
+ 	gtk_widget_set_tooltip_text (item, _("Background properties"));
+ 	gtk_widget_show (item);
+@@ -659,7 +713,7 @@ brasero_jacket_edit_init (BraseroJacketEdit *object)
+ 	gtk_toolbar_insert (GTK_TOOLBAR (toolbar), GTK_TOOL_ITEM (priv->colours), 1);
+ 
+ 	/* contents */
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
++	vbox = gtk_vbox_new (FALSE, 4);
+ 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 8);
+ 	gtk_widget_show (vbox);
+ 	gtk_box_pack_start (GTK_BOX (object), vbox, TRUE, TRUE, 0);
+@@ -671,7 +725,7 @@ brasero_jacket_edit_init (BraseroJacketEdit *object)
+ 	gtk_widget_show (scroll);
+ 	gtk_box_pack_start (GTK_BOX (vbox), scroll, TRUE, TRUE, 0);
+ 
+-	main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	main_box = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (main_box);
+ 	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scroll), main_box);
+ 
+@@ -698,7 +752,15 @@ brasero_jacket_edit_init (BraseroJacketEdit *object)
+ 
+ 	gtk_box_pack_start (GTK_BOX (main_box), view, FALSE, FALSE, 0);
+ 
+-	brasero_jacket_font_set_name (BRASERO_JACKET_FONT (priv->fonts), "Sans 12");
++	style = gtk_widget_get_style (priv->front);
++	if (pango_font_description_get_set_fields (style->font_desc) & PANGO_FONT_MASK_SIZE) {
++		guint size;
++		gchar string [8] = { 0, };
++
++		size = pango_font_description_get_size (style->font_desc);
++		sprintf (string, "%i", size);
++		brasero_jacket_font_set_name (BRASERO_JACKET_FONT (priv->fonts), "Sans 12");
++	}
+ }
+ 
+ void
+--- a/libbrasero-utils/brasero-jacket-edit.h
++++ b/libbrasero-utils/brasero-jacket-edit.h
+@@ -51,12 +51,12 @@ typedef struct _BraseroJacketEdit BraseroJacketEdit;
+ 
+ struct _BraseroJacketEditClass
+ {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ };
+ 
+ struct _BraseroJacketEdit
+ {
+-	GtkBox parent_instance;
++	GtkVBox parent_instance;
+ };
+ 
+ GType brasero_jacket_edit_get_type (void) G_GNUC_CONST;
+--- a/libbrasero-utils/brasero-jacket-font.c
++++ b/libbrasero-utils/brasero-jacket-font.c
+@@ -73,7 +73,7 @@ static const guint16 font_sizes[] = {
+ 
+ static guint jacket_font_signals[LAST_SIGNAL] = { 0 };
+ 
+-G_DEFINE_TYPE (BraseroJacketFont, brasero_jacket_font, GTK_TYPE_BOX);
++G_DEFINE_TYPE (BraseroJacketFont, brasero_jacket_font, GTK_TYPE_HBOX);
+ 
+ static void
+ brasero_jacket_font_family_changed_cb (GtkComboBox *combo,
+--- a/libbrasero-utils/brasero-jacket-font.h
++++ b/libbrasero-utils/brasero-jacket-font.h
+@@ -49,12 +49,12 @@ typedef struct _BraseroJacketFont BraseroJacketFont;
+ 
+ struct _BraseroJacketFontClass
+ {
+-	GtkBoxClass parent_class;
++	GtkHBoxClass parent_class;
+ };
+ 
+ struct _BraseroJacketFont
+ {
+-	GtkBox parent_instance;
++	GtkHBox parent_instance;
+ };
+ 
+ GType brasero_jacket_font_get_type (void) G_GNUC_CONST;
+--- a/libbrasero-utils/brasero-jacket-view.c
++++ b/libbrasero-utils/brasero-jacket-view.c
+@@ -56,8 +56,11 @@ struct _BraseroJacketViewPrivate
+ 	GdkColor b_color2;
+ 	BraseroJacketColorStyle color_style;
+ 
++	cairo_pattern_t *pattern;
++
+ 	GdkPixbuf *image;
+ 	GdkPixbuf *scaled;
++
+ 	gchar *image_path;
+ 	BraseroJacketImageStyle image_style;
+ };
+@@ -363,19 +368,49 @@ brasero_jacket_view_render_body (BraseroJacketView *self,
+ }
+ 
+ static void
+-brasero_jacket_view_render_background (BraseroJacketView *self,
+-				       cairo_t *ctx,
+-				       GdkPixbuf *scaled,
+-				       gint x,
+-				       gint y,
+-				       gint width,
+-				       gint height)
++brasero_jacket_view_render (BraseroJacketView *self,
++			    cairo_t *ctx,
++			    PangoLayout *layout,
++			    GdkPixbuf *scaled,
++			    gdouble resolution_x,
++			    gdouble resolution_y,
++			    guint x,
++			    guint y,
++			    GdkRectangle *area,
++			    gboolean render_if_empty)
+ {
+ 	BraseroJacketViewPrivate *priv;
++	int height, width;
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+ 
+-	/* draw background when it is a pattern */
++	if (priv->side == BRASERO_JACKET_BACK) {
++		width = COVER_WIDTH_BACK_INCH * resolution_x;
++		height = COVER_HEIGHT_BACK_INCH * resolution_y;
++	}
++	else {
++		width = COVER_WIDTH_FRONT_INCH * resolution_x;
++		height = COVER_HEIGHT_FRONT_INCH * resolution_y;
++	}
++
++	/* set clip */
++	cairo_reset_clip (ctx);
++	cairo_rectangle (ctx, area->x, area->y, area->width, area->height);
++	cairo_clip (ctx);
++
++	/* draw white surroundings */
++	cairo_set_source_rgb (ctx, 1.0, 1.0, 1.0);
++	cairo_paint (ctx);
++
++	/* draw background */
++	cairo_rectangle (ctx, x, y, width + 2.0, height + 2.0);
++	cairo_clip (ctx);
++
++	if (priv->pattern) {
++		cairo_set_source (ctx, priv->pattern);
++		cairo_paint (ctx);
++	}
++
+ 	if (scaled) {
+ 		/* The problem is the resolution here. The one for the screen
+ 		 * may not be the one for the printer. So do not use our private
+@@ -395,77 +430,8 @@ brasero_jacket_view_render_background (BraseroJacketView *self,
+ 			cairo_pattern_set_extend (pattern, CAIRO_EXTEND_REPEAT);
+ 		}
+ 
+-		cairo_rectangle (ctx, x, y, width, height);
+-		cairo_fill (ctx);
++		cairo_paint (ctx);
+ 	}
+-	else if (priv->color_style != BRASERO_JACKET_COLOR_NONE) {
+-		cairo_pattern_t *pattern;
+-
+-		if (priv->color_style == BRASERO_JACKET_COLOR_SOLID) {
+-			pattern = cairo_pattern_create_rgb (priv->b_color.red/G_MAXINT16,
+-							    priv->b_color.green/G_MAXINT16,
+-							    priv->b_color.blue/G_MAXINT16);
+-		}
+-		else {
+-			if (priv->color_style == BRASERO_JACKET_COLOR_HGRADIENT)
+-				pattern = cairo_pattern_create_linear (x,
+-								       y,
+-								       width + x,
+-								       y);
+-			else /* if (priv->color_style == BRASERO_JACKET_COLOR_VGRADIENT) */
+-				pattern = cairo_pattern_create_linear (x,
+-								       y,
+-								       x,
+-								       height + y);
+-
+-			cairo_pattern_add_color_stop_rgb (pattern,
+-							  0.0,
+-							  priv->b_color.red/G_MAXINT16,
+-							  priv->b_color.green/G_MAXINT16,
+-							  priv->b_color.blue/G_MAXINT16);
+-
+-			cairo_pattern_add_color_stop_rgb (pattern,
+-							  1.0,
+-							  priv->b_color2.red/G_MAXINT16,
+-							  priv->b_color2.green/G_MAXINT16,
+-							  priv->b_color2.blue/G_MAXINT16);
+-		}
+-
+-		cairo_pattern_set_extend (pattern, CAIRO_EXTEND_NONE);
+-		cairo_rectangle (ctx, x, y, width, height);
+-		cairo_set_source (ctx, pattern);
+-		cairo_fill (ctx);
+-
+-		cairo_pattern_destroy (pattern);
+-	}
+-}
+-
+-static void
+-brasero_jacket_view_render (BraseroJacketView *self,
+-			    cairo_t *ctx,
+-			    PangoLayout *layout,
+-			    GdkPixbuf *scaled,
+-			    gdouble resolution_x,
+-			    gdouble resolution_y,
+-			    gint x,
+-			    gint y,
+-			    gboolean render_if_empty)
+-{
+-	BraseroJacketViewPrivate *priv;
+-	int height, width;
+-
+-	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+-
+-	if (priv->side == BRASERO_JACKET_BACK) {
+-		width = COVER_WIDTH_BACK_INCH * resolution_x;
+-		height = COVER_HEIGHT_BACK_INCH * resolution_y;
+-	}
+-	else {
+-		width = COVER_WIDTH_FRONT_INCH * resolution_x;
+-		height = COVER_HEIGHT_FRONT_INCH * resolution_y;
+-	}
+-
+-	brasero_jacket_view_render_background (self, ctx, scaled, x, y, width, height);
+ 
+ 	if (priv->side == BRASERO_JACKET_BACK) {
+ 		gdouble line_x, line_y;
+@@ -506,12 +472,14 @@ brasero_jacket_view_render (BraseroJacketView *self,
+ 						      resolution_y,
+ 						      x,
+ 						      y);
++
+ 		cairo_restore (ctx);
+ 	}
+ 
+ 	/* Draw the rectangle */
+ 	cairo_set_source_rgb (ctx, 0.0, 0.0, 0.0);
+ 	cairo_set_line_width (ctx, 1.0);
++
+ 	cairo_rectangle (ctx,
+ 			 x + 0.5,
+ 			 y + 0.5,
+@@ -551,8 +519,8 @@ brasero_jacket_view_print (BraseroJacketView *self,
+ 			   gdouble x,
+ 			   gdouble y)
+ {
+-	guint height;
+ 	cairo_t *ctx;
++	GdkRectangle rect;
+ 	PangoLayout *layout;
+ 	gdouble resolution_x;
+ 	gdouble resolution_y;
+@@ -566,11 +534,17 @@ brasero_jacket_view_print (BraseroJacketView *self,
+ 	/* set clip */
+ 	resolution_x = gtk_print_context_get_dpi_x (context);
+ 	resolution_y = gtk_print_context_get_dpi_y (context);
++	rect.x = x;
++	rect.y = y;
+ 
+-	if (priv->side == BRASERO_JACKET_BACK)
+-		height = (resolution_y * COVER_HEIGHT_BACK_INCH) + 1.0;
+-	else
+-		height = (resolution_y * COVER_HEIGHT_FRONT_INCH) + 1.0;
++	if (priv->side == BRASERO_JACKET_BACK) {
++		rect.width = (resolution_x * COVER_WIDTH_BACK_INCH) + 1.0;
++		rect.height = (resolution_y * COVER_HEIGHT_BACK_INCH) + 1.0;
++	}
++	else {
++		rect.width = (resolution_x * COVER_WIDTH_FRONT_INCH) + 1.0;
++		rect.height = (resolution_y * COVER_HEIGHT_FRONT_INCH) + 1.0;
++	}
+ 
+ 	/* Make sure we scale the image with the correct resolution */
+ 	if (priv->image_style == BRASERO_JACKET_IMAGE_STRETCH)
+@@ -589,6 +563,7 @@ brasero_jacket_view_print (BraseroJacketView *self,
+ 				    resolution_y,
+ 				    x,
+ 				    y,
++				    &rect,
+ 				    FALSE);
+ 
+ 	/* Now let's render the text in main buffer */
+@@ -606,7 +581,7 @@ brasero_jacket_view_print (BraseroJacketView *self,
+ 	if (scaled)
+ 		g_object_unref (scaled);
+ 
+-	return height;
++	return rect.height;
+ }
+ 
+ static void
+@@ -614,6 +589,9 @@ brasero_jacket_view_cursor_position_changed_cb (GObject *buffer,
+ 						GParamSpec *spec,
+ 						BraseroJacketView *self)
+ {
++	BraseroJacketViewPrivate *priv;
++
++	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+ 	g_signal_emit (self,
+ 		       jacket_view_signals [TAGS_CHANGED],
+ 		       0);
+@@ -691,11 +669,7 @@ brasero_jacket_view_scrolled_cb (GtkAdjustment *adj,
+ 	gtk_text_buffer_get_end_iter (buffer, &end);
+ 
+ 	gtk_text_view_get_visible_rect (view, &rect);
+-	gtk_text_view_get_iter_at_position (view,
+-					    &start,
+-					    &trailing,
+-					    rect.x + rect.width,
+-					    rect.y + rect.height - gtk_adjustment_get_value (adj));
++	gtk_text_view_get_iter_at_position (view, &start, &trailing, rect.x + rect.width, rect.y + rect.height - gtk_adjustment_get_value (adj));
+ 	gtk_text_buffer_delete (buffer, &start, &end);
+ 
+ 	gtk_adjustment_set_value (adj, 0.0);
+@@ -716,31 +690,26 @@ brasero_jacket_view_configure_background (BraseroJacketView *self)
+ 
+ 	dialog = brasero_jacket_background_new ();
+ 
+-	if (priv->image_style != BRASERO_JACKET_IMAGE_NONE) {
+-		brasero_jacket_background_set_image_style (BRASERO_JACKET_BACKGROUND (dialog), priv->image_style);
+-		brasero_jacket_background_set_image_path (BRASERO_JACKET_BACKGROUND (dialog), priv->image_path);
+-	}
+-	else if (priv->color_style != BRASERO_JACKET_COLOR_NONE) {
+-		brasero_jacket_background_set_color_style (BRASERO_JACKET_BACKGROUND (dialog), priv->color_style);
+-		brasero_jacket_background_set_color (BRASERO_JACKET_BACKGROUND (dialog),
+-						     &priv->b_color,
+-						     &priv->b_color2);
+-	}
++	brasero_jacket_background_set_image_path (BRASERO_JACKET_BACKGROUND (dialog), priv->image_path);
++	brasero_jacket_background_set_image_style (BRASERO_JACKET_BACKGROUND (dialog), priv->image_style);
++	brasero_jacket_background_set_color (BRASERO_JACKET_BACKGROUND (dialog),
++					     &priv->b_color,
++					     &priv->b_color2);
++	brasero_jacket_background_set_color_style (BRASERO_JACKET_BACKGROUND (dialog), priv->color_style);
+ 
+ 	gtk_dialog_run (GTK_DIALOG (dialog));
+ 
+ 	image_style = brasero_jacket_background_get_image_style (BRASERO_JACKET_BACKGROUND (dialog));
+-	if (image_style != BRASERO_JACKET_IMAGE_NONE) {
+-		path = brasero_jacket_background_get_image_path (BRASERO_JACKET_BACKGROUND (dialog));
+-		brasero_jacket_view_set_image (self, image_style, path);
+-		g_free (path);
+-	}
++	path = brasero_jacket_background_get_image_path (BRASERO_JACKET_BACKGROUND (dialog));
++	brasero_jacket_view_set_image_style (self, image_style);
++	brasero_jacket_view_set_image (self, path);
++	g_free (path);
++
++	brasero_jacket_background_get_color (BRASERO_JACKET_BACKGROUND (dialog), &color, &color2);
++	brasero_jacket_view_set_color_background (self, &color, &color2);
+ 
+ 	color_style = brasero_jacket_background_get_color_style (BRASERO_JACKET_BACKGROUND (dialog));
+-	if (color_style != BRASERO_JACKET_COLOR_NONE) {
+-		brasero_jacket_background_get_color (BRASERO_JACKET_BACKGROUND (dialog), &color, &color2);
+-		brasero_jacket_view_set_color (self, color_style, &color, &color2);
+-	}
++	brasero_jacket_view_set_color_style (self, color_style);
+ 
+ 	gtk_widget_destroy (dialog);
+ }
+@@ -788,8 +757,8 @@ brasero_jacket_view_set_side (BraseroJacketView *self,
+ 
+ 	if (priv->side == BRASERO_JACKET_BACK) {
+ 		GtkTextBuffer *sides_buffer;
+-		GtkAdjustment *vadj;
+-		GtkAdjustment *hadj;
++		GtkObject *vadj;
++		GtkObject *hadj;
+ 
+ 		sides_buffer = GTK_TEXT_BUFFER (brasero_jacket_buffer_new ());
+ 		g_signal_connect (sides_buffer,
+@@ -834,79 +803,91 @@ brasero_jacket_view_set_side (BraseroJacketView *self,
+ 				  G_CALLBACK (brasero_jacket_view_scrolled_cb),
+ 				  priv->sides);
+ 
+-		gtk_scrollable_set_hadjustment (GTK_SCROLLABLE (priv->sides), hadj);
+-		gtk_scrollable_set_vadjustment (GTK_SCROLLABLE (priv->sides), vadj);
++		gtk_widget_set_scroll_adjustments (priv->sides, GTK_ADJUSTMENT (hadj), GTK_ADJUSTMENT (vadj));
+ 	}
+ 	else
+ 		brasero_jacket_buffer_set_default_text (BRASERO_JACKET_BUFFER (buffer), _("FRONT COVER"));
+ }
+ 
+ static void
+-brasero_jacket_view_set_textview_background (BraseroJacketView *self)
++brasero_jacket_view_update_edit_image (BraseroJacketView *self)
+ {
+-	cairo_t *cr;
++	cairo_t *ctx;
+ 	guint resolution;
+ 	GdkWindow *window;
++	GdkPixmap *pixmap;
+ 	GtkWidget *toplevel;
+-	cairo_surface_t *surface;
+ 	GtkAllocation allocation;
+-	guint x, y, width, height;
+-	cairo_surface_t *subsurface;
++	gint width, height, x, y;
+ 	BraseroJacketViewPrivate *priv;
+-	cairo_pattern_t *pattern = NULL;
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+ 
+-	if (priv->image_style == BRASERO_JACKET_IMAGE_NONE
+-	&&  priv->color_style == BRASERO_JACKET_COLOR_NONE)
++	if (!priv->pattern && !priv->scaled)
+ 		return;
+ 
+ 	toplevel = gtk_widget_get_toplevel (GTK_WIDGET (self));
+ 	if (!GTK_IS_WINDOW (toplevel))
+ 		return;
+ 
++	resolution = gdk_screen_get_resolution (gtk_window_get_screen (GTK_WINDOW (toplevel)));
+ 	window = gtk_text_view_get_window (GTK_TEXT_VIEW (priv->edit), GTK_TEXT_WINDOW_TEXT);
++
+ 	if (!window)
+ 		return;
+ 
+-	resolution = gdk_screen_get_resolution (gtk_window_get_screen (GTK_WINDOW (toplevel)));
+-	if (priv->side == BRASERO_JACKET_BACK) {
+-		width = COVER_WIDTH_BACK_INCH * resolution;
+-		height = COVER_HEIGHT_BACK_INCH * resolution;
+-	}
+-	else {
+-		width = COVER_WIDTH_FRONT_INCH * resolution;
+-		height = COVER_HEIGHT_FRONT_INCH * resolution;
+-	}
++	x = COVER_TEXT_MARGIN * resolution;
++	y = COVER_TEXT_MARGIN * resolution;
++	gtk_widget_get_allocation (priv->edit, &allocation);
++	width = allocation.width;
++	height = allocation.height;
++
++	if (priv->side == BRASERO_JACKET_BACK)
++		x += COVER_WIDTH_SIDE_INCH * resolution;
+ 
+-	surface = gdk_window_create_similar_surface (window,
+-						     CAIRO_CONTENT_COLOR_ALPHA,
+-						     width,
+-						     height);
+-	cr = cairo_create (surface);
++	pixmap = gdk_pixmap_new (GDK_DRAWABLE (window),
++				 width,
++				 height,
++				 -1);
+ 
+-	cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+-	cairo_paint (cr);
++	ctx = gdk_cairo_create (GDK_DRAWABLE (pixmap));
+ 
+-	x = COVER_TEXT_MARGIN * resolution;
+-       	y = COVER_TEXT_MARGIN * resolution;
+-       	gtk_widget_get_allocation (priv->edit, &allocation);
+-
+-       	if (priv->side == BRASERO_JACKET_BACK)
+-        	x += COVER_WIDTH_SIDE_INCH * resolution;
+-
+-	brasero_jacket_view_render_background (self, cr, priv->scaled, 0, 0, width, height);
+-	subsurface = cairo_surface_create_for_rectangle (surface,
+-							 x,
+-							 y,
+-							 allocation.width,
+-							 allocation.height);
+-	pattern = cairo_pattern_create_for_surface (subsurface);
+-	gdk_window_set_background_pattern (window, pattern);
+-	cairo_pattern_destroy (pattern);
+-	cairo_surface_destroy (subsurface);
+-	cairo_surface_destroy (surface);
+-	cairo_destroy (cr);
++	cairo_rectangle (ctx,
++			 0,
++			 0,
++			 width,
++			 height);
++
++	if (priv->pattern)
++		cairo_set_source (ctx, priv->pattern);
++
++	cairo_clip (ctx);
++	cairo_paint (ctx);
++
++	if (priv->scaled) {
++		if (priv->image_style == BRASERO_JACKET_IMAGE_CENTER) {
++			gdk_cairo_set_source_pixbuf (ctx,
++			                             priv->scaled,
++			                             (width - gdk_pixbuf_get_width (priv->scaled)) / 2,
++			                             (height - gdk_pixbuf_get_height (priv->scaled)) / 2);
++		}
++		else if (priv->image_style == BRASERO_JACKET_IMAGE_TILE) {
++			cairo_pattern_t *pattern;
++
++			gdk_cairo_set_source_pixbuf (ctx, priv->scaled, 0, 0);
++			pattern = cairo_get_source (ctx);
++			cairo_pattern_set_extend (pattern, CAIRO_EXTEND_REPEAT);
++		}
++		else
++			gdk_cairo_set_source_pixbuf (ctx, priv->scaled, x, y);
++
++		cairo_paint (ctx);
++	}
++
++	cairo_destroy (ctx);
++
++	gdk_window_set_back_pixmap (window, pixmap, FALSE);
++	g_object_unref (pixmap);
+ }
+ 
+ static GdkPixbuf *
+@@ -947,11 +928,6 @@ brasero_jacket_view_update_image (BraseroJacketView *self)
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+ 
+-	if (priv->scaled) {
+-		g_object_unref (priv->scaled);
+-		priv->scaled = NULL;
+-	}
+-
+ 	if (!priv->image)
+ 		return;
+ 
+@@ -981,83 +957,127 @@ brasero_jacket_view_update_image (BraseroJacketView *self)
+ 	else if (priv->image_style == BRASERO_JACKET_IMAGE_TILE)
+ 		priv->scaled = g_object_ref (priv->image);
+ 
+-	/* Create a pattern out of the image */
+-	brasero_jacket_view_set_textview_background (self);
++	brasero_jacket_view_update_edit_image (self);
+ 	gtk_widget_queue_draw (GTK_WIDGET (self));
+ }
+ 
+-const gchar *
+-brasero_jacket_view_get_image (BraseroJacketView *self)
++void
++brasero_jacket_view_set_image_style (BraseroJacketView *self,
++				     BraseroJacketImageStyle style)
+ {
+ 	BraseroJacketViewPrivate *priv;
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+-	return priv->image_path;
++
++	if (priv->scaled) {
++		g_object_unref (priv->scaled);
++		priv->scaled = NULL;
++	}
++
++	priv->image_style = style;
++	brasero_jacket_view_update_image (self);
+ }
+ 
+-const gchar *
+-brasero_jacket_view_set_image (BraseroJacketView *self,
+-			       BraseroJacketImageStyle style,
+-			       const gchar *path)
++static void
++brasero_jacket_view_update_color (BraseroJacketView *self)
+ {
++	guint resolution;
++	GtkWidget *toplevel;
++	guint width, height;
++	cairo_pattern_t *pattern;
+ 	BraseroJacketViewPrivate *priv;
+-	GError *error = NULL;
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+ 
+-	if (!path)
+-		return priv->image_path;
+-
+-	priv->color_style = BRASERO_JACKET_COLOR_NONE;
++	if (priv->pattern) {
++		cairo_pattern_destroy (priv->pattern);
++		priv->pattern = NULL;
++	}
+ 
+-	if (g_strcmp0 (path, priv->image_path)) {
+-		GdkPixbuf *image = NULL;
+-	
+-		image = gdk_pixbuf_new_from_file (path, &error);
+-		if (error) {
+-			brasero_utils_message_dialog (gtk_widget_get_toplevel (GTK_WIDGET (self)),
+-						      /* Translators: This is an image,
+-						       * a picture, not a "Disc Image" */
+-						      _("The image could not be loaded."),
+-						      error->message,
+-						      GTK_MESSAGE_ERROR);
+-			g_error_free (error);
+-			return priv->image_path;
+-		}
++	toplevel = gtk_widget_get_toplevel (GTK_WIDGET (self));
++	if (!GTK_IS_WINDOW (toplevel))
++		return;
+ 
+-		if (priv->image_path) {
+-			g_free (priv->image_path);
+-			priv->image_path = NULL;
+-		}
+-		priv->image_path = g_strdup (path);
++	resolution = gdk_screen_get_resolution (gtk_window_get_screen (GTK_WINDOW (toplevel)));
++	if (priv->side == BRASERO_JACKET_BACK) {
++		height = resolution * COVER_HEIGHT_BACK_INCH;
++		width = resolution * COVER_WIDTH_BACK_INCH;
++	}
++	else {
++		height = resolution * COVER_HEIGHT_FRONT_INCH;
++		width = resolution * COVER_WIDTH_FRONT_INCH;
++	}
+ 
+-		if (priv->image) {
+-			g_object_unref (priv->image);
+-			priv->image = NULL;
+-		}
+-		priv->image = image;
++	if (priv->color_style == BRASERO_JACKET_COLOR_SOLID) {
++		pattern = cairo_pattern_create_rgb (priv->b_color.red/G_MAXINT16,
++						    priv->b_color.green/G_MAXINT16,
++						    priv->b_color.blue/G_MAXINT16);
++	}
++	else {
++		if (priv->color_style == BRASERO_JACKET_COLOR_HGRADIENT)
++			pattern = cairo_pattern_create_linear (0.0,
++							       0.0,
++							       width,
++							       0.0);
++		else /* if (priv->color_style == BRASERO_JACKET_COLOR_VGRADIENT) */
++			pattern = cairo_pattern_create_linear (0.0,
++							       0.0,
++							       0.0,
++							       height);
++
++		cairo_pattern_add_color_stop_rgb (pattern,
++						  0.0,
++						  priv->b_color.red/G_MAXINT16,
++						  priv->b_color.green/G_MAXINT16,
++						  priv->b_color.blue/G_MAXINT16);
++
++		cairo_pattern_add_color_stop_rgb (pattern,
++						  1.0,
++						  priv->b_color2.red/G_MAXINT16,
++						  priv->b_color2.green/G_MAXINT16,
++						  priv->b_color2.blue/G_MAXINT16);
+ 	}
+ 
+-	priv->image_style = style;
+-	brasero_jacket_view_update_image (self);
++	priv->pattern = pattern;
++
++	brasero_jacket_view_update_edit_image (self);
++	gtk_widget_queue_draw (GTK_WIDGET (self));
++}
++
++const gchar *
++brasero_jacket_view_get_image (BraseroJacketView *self)
++{
++	BraseroJacketViewPrivate *priv;
++
++	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+ 	return priv->image_path;
+ }
+ 
+-void
+-brasero_jacket_view_set_color (BraseroJacketView *self,
+-			       BraseroJacketColorStyle style,
+-			       GdkColor *color,
+-			       GdkColor *color2)
++const gchar *
++brasero_jacket_view_set_image (BraseroJacketView *self,
++			       const gchar *path)
+ {
+ 	BraseroJacketViewPrivate *priv;
++	GdkPixbuf *image = NULL;
++	GError *error = NULL;
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
+ 
+-	priv->b_color = *color;
+-	priv->b_color2 = *color2;
+-	priv->color_style = style;
++	if (!path)
++		return priv->image_path;
++
++	image = gdk_pixbuf_new_from_file (path, &error);
++	if (error) {
++		brasero_utils_message_dialog (gtk_widget_get_toplevel (GTK_WIDGET (self)),
++					      /* Translators: This is an image,
++					       * a picture, not a "Disc Image" */
++					      _("The image could not be loaded."),
++					      error->message,
++					      GTK_MESSAGE_ERROR);
++		g_error_free (error);
++		return priv->image_path;
++	}
+ 
+-	priv->image_style = BRASERO_JACKET_IMAGE_NONE;
+ 	if (priv->image_path) {
+ 		g_free (priv->image_path);
+ 		priv->image_path = NULL;
+@@ -1073,8 +1093,35 @@ brasero_jacket_view_set_color (BraseroJacketView *self,
+ 		priv->image = NULL;
+ 	}
+ 
+-	brasero_jacket_view_set_textview_background (self);
+-	gtk_widget_queue_draw (GTK_WIDGET (self));
++	priv->image_path = g_strdup (path);
++	priv->image = image;
++
++	brasero_jacket_view_update_image (self);
++	return priv->image_path;
++}
++
++void
++brasero_jacket_view_set_color_background (BraseroJacketView *self,
++					  GdkColor *color,
++					  GdkColor *color2)
++{
++	BraseroJacketViewPrivate *priv;
++
++	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
++	priv->b_color = *color;
++	priv->b_color2 = *color2;
++	brasero_jacket_view_update_color (self);
++}
++
++void
++brasero_jacket_view_set_color_style (BraseroJacketView *self,
++				     BraseroJacketColorStyle style)
++{
++	BraseroJacketViewPrivate *priv;
++
++	priv = BRASERO_JACKET_VIEW_PRIVATE (self);
++	priv->color_style = style;
++	brasero_jacket_view_update_color (self);
+ }
+ 
+ GtkTextAttributes *
+@@ -1143,28 +1190,34 @@ brasero_jacket_view_get_side_buffer (BraseroJacketView *self)
+ }
+ 
+ static void
+-brasero_jacket_draw_textview (GtkWidget *widget,
+-                              GtkWidget *textview)
++brasero_jacket_expose_textview (GtkWidget *widget,
++                                GtkWidget *textview,
++                                GdkEventExpose *event)
+ {
+-	GdkWindow *window;
++	GdkRectangle child_area;
++
++	if (gtk_widget_intersect (textview, &event->area, &child_area)) {
++		GdkWindow *window;
+ 
+-	window = gtk_text_view_get_window (GTK_TEXT_VIEW (textview), GTK_TEXT_WINDOW_WIDGET);
++		window = gtk_text_view_get_window (GTK_TEXT_VIEW (textview), GTK_TEXT_WINDOW_WIDGET);
+ 
+-	g_object_ref (window);
+-	gdk_window_invalidate_rect (window, NULL, TRUE);
+-	gdk_window_process_updates (window, TRUE);
+-	g_object_unref (window);
++		g_object_ref (window);
++		gdk_window_invalidate_rect (window, &child_area, TRUE);
++		gdk_window_process_updates (window, TRUE);
++		g_object_unref (window);
+ 
+-	/* Reminder: the following would not work...
+-	 * gtk_container_propagate_expose (GTK_CONTAINER (widget), textview, &child_event); */
++		/* Reminder: the following would not work...
++		 * gtk_container_propagate_expose (GTK_CONTAINER (widget), textview, &child_event); */
++	}
+ }
+ 
+ static gboolean
+-brasero_jacket_view_draw (GtkWidget *widget,
+-			  cairo_t *ctx)
++brasero_jacket_view_expose (GtkWidget *widget,
++			    GdkEventExpose *event)
+ {
+ 	guint x;
+ 	guint y;
++	cairo_t *ctx;
+ 	gdouble resolution;
+ 	GtkWidget *toplevel;
+ 	PangoLayout *layout;
+@@ -1173,14 +1226,11 @@ brasero_jacket_view_draw (GtkWidget *widget,
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (widget);
+ 
++	ctx = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
+ 	toplevel = gtk_widget_get_toplevel (widget);
+ 	if (!GTK_IS_WINDOW (toplevel))
+ 		return FALSE;
+ 
+-	/* draw white surroundings (for widget only) */
+-	cairo_set_source_rgb (ctx, 1.0, 1.0, 1.0);
+-	cairo_paint (ctx);
+-
+ 	resolution = gdk_screen_get_resolution (gtk_window_get_screen (GTK_WINDOW (toplevel)));
+ 	layout = gtk_widget_create_pango_layout (widget, NULL);
+ 	gtk_widget_get_allocation (widget, &allocation);
+@@ -1196,9 +1246,16 @@ brasero_jacket_view_draw (GtkWidget *widget,
+ 					    resolution,
+ 					    x,
+ 					    y,
++					    &event->area,
+ 					    TRUE);
+ 
+-		/* top rectangle for side text */
++		/* rectangle for side text */
++
++		/* set clip */
++		cairo_reset_clip (ctx);
++		cairo_rectangle (ctx, event->area.x, event->area.y, event->area.width, event->area.height);
++		cairo_clip (ctx);
++
+ 		cairo_move_to (ctx, 0., 0.);
+ 
+ 		cairo_set_antialias (ctx, CAIRO_ANTIALIAS_DEFAULT);
+@@ -1226,25 +1283,28 @@ brasero_jacket_view_draw (GtkWidget *widget,
+ 					    resolution,
+ 					    x,
+ 					    y,
++					    &event->area,
+ 					    TRUE);
+ 	}
+ 
+ 	if (priv->sides)
+-		brasero_jacket_draw_textview (widget, priv->sides);
++		brasero_jacket_expose_textview (widget, priv->sides, event);
+ 
+-	brasero_jacket_draw_textview (widget, priv->edit);
++	brasero_jacket_expose_textview (widget, priv->edit, event);
+ 	
+ 	g_object_unref (layout);
++	cairo_destroy (ctx);
++
+ 	return FALSE;
+ }
+ 
+ static void
+ brasero_jacket_view_realize (GtkWidget *widget)
+ {
+ 	GtkAllocation allocation;
+ 	GdkWindowAttr attributes;
+ 	gint attributes_mask;
+ 	GdkWindow *window;
+ 
+ 	attributes.window_type = GDK_WINDOW_CHILD;
+ 	gtk_widget_get_allocation (widget, &allocation);
+@@ -1254,9 +1317,10 @@ brasero_jacket_view_realize (GtkWidget *widget)
+ 	attributes.height = allocation.height;
+ 	attributes.wclass = GDK_INPUT_OUTPUT;
+ 	attributes.visual = gtk_widget_get_visual (widget);
++	attributes.colormap = gtk_widget_get_colormap (widget);
+ 	attributes.event_mask = gtk_widget_get_events (widget);
+ 	attributes.event_mask |= GDK_EXPOSURE_MASK|GDK_BUTTON_PRESS_MASK|GDK_LEAVE_NOTIFY_MASK;
+-	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL;
++	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_COLORMAP;
+ 
+ 	gtk_widget_set_window (widget, gdk_window_new (gtk_widget_get_parent_window (widget),
+ 						       &attributes,
+@@ -1265,50 +1329,19 @@ brasero_jacket_view_realize (GtkWidget *widget)
+ 	gdk_window_set_user_data (window, widget);
+ 
+ 	gtk_widget_set_realized (widget, TRUE);
+-	gdk_window_show (gtk_widget_get_window (widget));
+-}
+-
+-static void
+-brasero_jacket_view_get_preferred_width (GtkWidget *widget,
+-                                         gint      *minimum,
+-                                         gint      *natural)
+-{
+-	BraseroJacketViewPrivate *priv;
+-	GtkWidget *toplevel;
+-	gdouble resolution;
+-        gint width;
+-
+-	priv = BRASERO_JACKET_VIEW_PRIVATE (widget);
+-
+-	if (!gtk_widget_get_parent (widget))
+-		return;
+-
+-	toplevel = gtk_widget_get_toplevel (widget);
+-	if (!GTK_IS_WINDOW (toplevel))
+-		return;
+ 
+-	resolution = gdk_screen_get_resolution (gtk_window_get_screen (GTK_WINDOW (toplevel)));
++	gtk_widget_style_attach (widget);
+ 
+-	if (priv->side == BRASERO_JACKET_FRONT) {
+-		width = COVER_WIDTH_FRONT_INCH * resolution + BRASERO_JACKET_VIEW_MARGIN * 2.0;
+-	}
+-	else {
+-		width = COVER_WIDTH_BACK_INCH * resolution +
+-				 BRASERO_JACKET_VIEW_MARGIN * 2.0;
+-	}
+-
+-        *minimum = *natural = width;
++	gdk_window_show (gtk_widget_get_window (widget));
+ }
+ 
+ static void
+-brasero_jacket_view_get_preferred_height (GtkWidget *widget,
+-                                          gint      *minimum,
+-                                          gint      *natural)
++brasero_jacket_view_size_request (GtkWidget *widget,
++				  GtkRequisition *request)
+ {
+ 	BraseroJacketViewPrivate *priv;
+ 	GtkWidget *toplevel;
+ 	gdouble resolution;
+-        gint height;
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (widget);
+ 
+@@ -1322,15 +1355,16 @@ brasero_jacket_view_get_preferred_height (GtkWidget *widget,
+ 	resolution = gdk_screen_get_resolution (gtk_window_get_screen (GTK_WINDOW (toplevel)));
+ 
+ 	if (priv->side == BRASERO_JACKET_FRONT) {
+-		height = COVER_HEIGHT_FRONT_INCH * resolution + BRASERO_JACKET_VIEW_MARGIN * 2.0;
++		request->width = COVER_WIDTH_FRONT_INCH * resolution + BRASERO_JACKET_VIEW_MARGIN * 2.0;
++		request->height = COVER_HEIGHT_FRONT_INCH * resolution + BRASERO_JACKET_VIEW_MARGIN * 2.0;
+ 	}
+-	else {
+-		height = COVER_HEIGHT_BACK_INCH * resolution +
+-			 COVER_WIDTH_SIDE_INCH * resolution +
+-			 BRASERO_JACKET_VIEW_MARGIN * 3.0;
++	else if (priv->side == BRASERO_JACKET_BACK) {
++		request->width = COVER_WIDTH_BACK_INCH * resolution +
++				 BRASERO_JACKET_VIEW_MARGIN * 2.0;
++		request->height = COVER_HEIGHT_BACK_INCH * resolution +
++				  COVER_WIDTH_SIDE_INCH * resolution +
++				  BRASERO_JACKET_VIEW_MARGIN * 3.0;
+ 	}
+-
+-        *minimum = *natural = height;
+ }
+ 
+ static void
+@@ -1390,7 +1424,7 @@ brasero_jacket_view_size_allocate (GtkWidget *widget,
+ 		view_alloc.height = (gdouble) (COVER_HEIGHT_FRONT_INCH - COVER_TEXT_MARGIN * 2.0) * resolution;
+ 	}
+ 
+-	brasero_jacket_view_set_textview_background (BRASERO_JACKET_VIEW (widget));
++	brasero_jacket_view_update_edit_image (BRASERO_JACKET_VIEW (widget));
+ 	gtk_widget_size_allocate (priv->edit, &view_alloc);
+ 
+ 	gtk_widget_set_allocation (widget, allocation);
+@@ -1437,8 +1471,8 @@ brasero_jacket_view_init (BraseroJacketView *object)
+ {
+ 	BraseroJacketViewPrivate *priv;
+ 	GtkTextBuffer *buffer;
+-	GtkAdjustment *vadj;
+-	GtkAdjustment *hadj;
++	GtkObject *vadj;
++	GtkObject *hadj;
+ 
+ 	priv = BRASERO_JACKET_VIEW_PRIVATE (object);
+ 
+@@ -1455,7 +1489,7 @@ brasero_jacket_view_init (BraseroJacketView *object)
+ 	priv->edit = gtk_text_view_new_with_buffer (buffer);
+ 	g_object_unref (buffer);
+ 
+-	gdk_color_parse ("white", &priv->b_color);
++	priv->b_color = gtk_widget_get_style (priv->edit)->bg [0];
+ 	priv->color_style = BRASERO_JACKET_COLOR_SOLID;
+ 
+ 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (priv->edit), GTK_WRAP_CHAR);
+@@ -1487,8 +1521,9 @@ brasero_jacket_view_init (BraseroJacketView *object)
+ 			  priv->edit);
+ 
+ 	gtk_container_set_focus_child (GTK_CONTAINER (object), priv->edit);
+-	gtk_scrollable_set_hadjustment (GTK_SCROLLABLE (priv->edit), hadj);
+-	gtk_scrollable_set_vadjustment (GTK_SCROLLABLE (priv->edit), vadj);
++	gtk_widget_set_scroll_adjustments (priv->edit,
++					   GTK_ADJUSTMENT (hadj),
++					   GTK_ADJUSTMENT (vadj));
+ }
+ 
+ static void
+@@ -1507,6 +1542,11 @@ brasero_jacket_view_finalize (GObject *object)
+ 		priv->scaled = NULL;
+ 	}
+ 
++	if (priv->pattern) {
++		cairo_pattern_destroy (priv->pattern);
++		priv->pattern = NULL;
++	}
++
+ 	if (priv->image_path) {
+ 		g_free (priv->image_path);
+ 		priv->image_path = NULL;
+@@ -1526,11 +1566,10 @@ brasero_jacket_view_class_init (BraseroJacketViewClass *klass)
+ 
+ 	object_class->finalize = brasero_jacket_view_finalize;
+ 
+-	widget_class->draw = brasero_jacket_view_draw;
++	widget_class->expose_event = brasero_jacket_view_expose;
+ 	widget_class->realize = brasero_jacket_view_realize;
+ 	widget_class->size_allocate = brasero_jacket_view_size_allocate;
+-	widget_class->get_preferred_width = brasero_jacket_view_get_preferred_width;
+-	widget_class->get_preferred_height = brasero_jacket_view_get_preferred_height;
++	widget_class->size_request = brasero_jacket_view_size_request;
+ 
+ 	container_class->forall = brasero_jacket_view_container_forall;
+ 	container_class->remove = brasero_jacket_view_container_remove;
+--- a/libbrasero-burn/brasero-burn-dialog.c
++++ b/libbrasero-burn/brasero-burn-dialog.c
+@@ -1432,7 +1413,7 @@ brasero_burn_dialog_activity_start (BraseroBurnDialog *dialog)
+ 	if (window) {
+ 		cursor = gdk_cursor_new (GDK_WATCH);
+ 		gdk_window_set_cursor (window, cursor);
+-		g_object_unref (cursor);
++		gdk_cursor_unref (cursor);
+ 	}
+ 
+ 	gtk_button_set_use_stock (GTK_BUTTON (priv->cancel), TRUE);
+@@ -1520,7 +1501,7 @@ brasero_burn_dialog_install_missing_cb (BraseroBurn *burn,
+ 
+ 	/* Get the xid */
+ 	window = gtk_widget_get_window (user_data);
+-	xid = gdk_x11_window_get_xid (window);
++	xid = gdk_x11_drawable_get_xid (GDK_DRAWABLE (window));
+ 
+ 	package = brasero_pk_new ();
+ 	cancel = g_cancellable_new ();
+@@ -1790,6 +1777,7 @@ brasero_burn_dialog_get_success_message (BraseroBurnDialog *dialog)
+ 			else
+ 				return g_strdup (_("Audio CD successfully burned"));
+ 		}
++
+ 		return g_strdup (_("Image successfully created"));
+ 	}
+ 	else if (brasero_track_type_get_has_medium (&priv->input)) {
+@@ -2539,11 +2580,11 @@ brasero_burn_dialog_init (BraseroBurnDialog * obj)
+ 			    TRUE,
+ 			    0);
+ 
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	vbox = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (vbox);
+ 	gtk_container_add (GTK_CONTAINER (alignment), vbox);
+ 
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
++	box = gtk_hbox_new (FALSE, 0);
+ 	gtk_widget_show (box);
+ 	gtk_box_pack_start (GTK_BOX (vbox), box, FALSE, TRUE, 0);
+ 
+--- a/libbrasero-burn/brasero-burn-options.c
++++ b/libbrasero-burn/brasero-burn-options.c
+@@ -127,7 +127,7 @@ brasero_burn_options_add_source (BraseroBurnOptions *self,
+ 		GtkWidget *hbox;
+ 		GtkWidget *alignment;
+ 
+-		hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
++		hbox = gtk_hbox_new (FALSE, 12);
+ 		gtk_widget_show (hbox);
+ 
+ 		gtk_box_pack_start (GTK_BOX (hbox), child, TRUE, TRUE, 0);
+@@ -626,7 +627,7 @@ brasero_burn_options_build_contents (BraseroBurnOptions *object)
+ 			    0);
+ 
+ 	/* Medium selection box */
+-	selection = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
++	selection = gtk_hbox_new (FALSE, 12);
+ 	gtk_widget_show (selection);
+ 
+ 	alignment = gtk_alignment_new (0.0, 0.5, 1.0, 1.0);
+@@ -678,7 +679,7 @@ brasero_burn_options_build_contents (BraseroBurnOptions *object)
+ 			    0);
+ 	priv->options_placeholder = alignment;
+ 
+-	priv->options = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	priv->options = gtk_vbox_new (FALSE, 0);
+ 	gtk_container_add (GTK_CONTAINER (alignment), priv->options);
+ 
+ 	g_signal_connect (priv->session,
+@@ -713,7 +714,7 @@ brasero_burn_options_reset (BraseroBurnOptions *self)
+ 		priv->options = NULL;
+ 	}
+ 
+-	priv->options = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	priv->options = gtk_vbox_new (FALSE, 0);
+ 	gtk_container_add (GTK_CONTAINER (priv->options_placeholder), priv->options);
+ 
+ 	if (priv->source) {
+@@ -1130,7 +1131,7 @@ brasero_burn_options_install_missing (BraseroPluginErrorType type,
+ 	int xid = 0;
+ 
+ 	/* Get the xid */
+-	xid = gdk_x11_window_get_xid (gtk_widget_get_window (GTK_WIDGET (user_data)));
++	xid = gdk_x11_drawable_get_xid (GDK_DRAWABLE (gtk_widget_get_window (GTK_WIDGET (user_data))));
+ 
+ 	package = brasero_pk_new ();
+ 	cancel = g_cancellable_new ();
+--- a/libbrasero-burn/brasero-drive-properties.c
++++ b/libbrasero-burn/brasero-drive-properties.c
+@@ -697,7 +704,7 @@ brasero_drive_properties_init (BraseroDriveProperties *object)
+ 
+ 	priv = BRASERO_DRIVE_PROPERTIES_PRIVATE (object);
+ 
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	vbox = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (vbox);
+ 	gtk_container_add (GTK_CONTAINER (object), vbox);
+ 
+@@ -772,7 +779,7 @@ brasero_drive_properties_init (BraseroDriveProperties *object)
+ 	image = gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_BUTTON);
+ 	gtk_widget_show (image);
+ 
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	box = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (box);
+ 	gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 0);
+ 	gtk_box_pack_start (GTK_BOX (box), label, TRUE, TRUE, 0);
+@@ -782,7 +789,7 @@ brasero_drive_properties_init (BraseroDriveProperties *object)
+ 	gtk_container_add (GTK_CONTAINER (button), box);
+ 	gtk_widget_set_tooltip_text (button, _("Set the directory where to store temporary files"));
+ 
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	box = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (box);
+ 
+ 	string = g_strdup_printf ("<b>%s</b>", _("Temporary files"));
+--- a/libbrasero-utils/brasero-jacket-view.h
++++ b/libbrasero-utils/brasero-jacket-view.h
+@@ -49,15 +49,15 @@ typedef enum {
+ #define COVER_WIDTH_FRONT_INCH		4.724
+ #define COVER_HEIGHT_FRONT_INCH		4.724
+ 
+-#define COVER_HEIGHT_BACK_MM		118.0
+-#define COVER_WIDTH_BACK_MM		150.0
++#define COVER_HEIGHT_BACK_MM		117.5
++#define COVER_WIDTH_BACK_MM		152.0
+ #define COVER_HEIGHT_BACK_INCH		4.646
+-#define COVER_WIDTH_BACK_INCH		5.906
++#define COVER_WIDTH_BACK_INCH		5.984
+ 
+ #define COVER_HEIGHT_SIDE_MM		COVER_HEIGHT_BACK_MM
+ #define COVER_WIDTH_SIDE_MM		6.0
+ #define COVER_HEIGHT_SIDE_INCH		COVER_HEIGHT_BACK_INCH
+-#define COVER_WIDTH_SIDE_INCH		0.236
++#define COVER_WIDTH_SIDE_INCH		0.235
+ 
+ #define COVER_TEXT_MARGIN		/*1.*/0.03 //0.079
+ 
+@@ -95,17 +95,22 @@ brasero_jacket_view_set_side (BraseroJacketView *view,
+ 			      BraseroJacketSide side);
+ 
+ void
+-brasero_jacket_view_set_color (BraseroJacketView *view,
+-			       BraseroJacketColorStyle style,
+-			       GdkColor *color,
+-			       GdkColor *color2);
++brasero_jacket_view_set_image_style (BraseroJacketView *view,
++				     BraseroJacketImageStyle style);
++
++void
++brasero_jacket_view_set_color_background (BraseroJacketView *view,
++					  GdkColor *color,
++					  GdkColor *color2);
++void
++brasero_jacket_view_set_color_style (BraseroJacketView *view,
++				     BraseroJacketColorStyle style);
+ 
+ const gchar *
+ brasero_jacket_view_get_image (BraseroJacketView *self);
+ 
+ const gchar *
+ brasero_jacket_view_set_image (BraseroJacketView *view,
+-			       BraseroJacketImageStyle style,
+ 			       const gchar *path);
+ 
+ void
+--- a/libbrasero-utils/brasero-misc.c
++++ b/libbrasero-utils/brasero-misc.c
+@@ -315,10 +298,10 @@ brasero_utils_pack_properties_list (const gchar *title, GSList *list)
+ 	GtkWidget *label;
+ 	GSList *iter;
+ 
+-	vbox_main = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	vbox_main = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (vbox_main);
+ 
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
++	hbox = gtk_hbox_new (FALSE, 0);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_end (GTK_BOX (vbox_main),
+ 			  hbox,
+@@ -334,7 +317,7 @@ brasero_utils_pack_properties_list (const gchar *title, GSList *list)
+ 			    TRUE,
+ 			    0);
+ 
+-	vbox_prop = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
++	vbox_prop = gtk_vbox_new (FALSE, 6);
+ 	gtk_widget_show (vbox_prop);
+ 	gtk_box_pack_start (GTK_BOX (hbox),
+ 			    vbox_prop,
+@@ -353,7 +336,7 @@ brasero_utils_pack_properties_list (const gchar *title, GSList *list)
+ 		GtkWidget *vbox;
+ 		GtkWidget *label;
+ 
+-		vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++		vbox = gtk_vbox_new (FALSE, 0);
+ 
+ 		label = gtk_label_new (title);
+ 		gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+--- a/libbrasero-utils/brasero-notify.c
++++ b/libbrasero-utils/brasero-notify.c
+@@ -123,5 +123,5 @@ brasero_notify_message_add (GtkWidget *self,
+ GtkWidget *
+ brasero_notify_new (void)
+ {
+-	return gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	return gtk_vbox_new (TRUE, 0);
+ }
+--- a/libbrasero-burn/brasero-cover.c
++++ b/libbrasero-burn/brasero-cover.c
+@@ -188,7 +188,8 @@ brasero_jacket_edit_set_audio_tracks_front (BraseroJacketView *front,
+ 		if (!path)
+ 			path = g_strdup (cover);
+ 
+-		brasero_jacket_view_set_image (front, BRASERO_JACKET_IMAGE_STRETCH, path);
++		brasero_jacket_view_set_image_style (front, BRASERO_JACKET_IMAGE_STRETCH);
++		brasero_jacket_view_set_image (front, path);
+ 		g_free (path);
+ 	}
+ 
+--- a/libbrasero-burn/burn-image-format.h
++++ b/libbrasero-burn/burn-image-format.h
+@@ -43,8 +43,8 @@ brasero_image_format_identify_cuesheet (const gchar *path,
+ 					GError **error);
+ 
+ gchar *
+-brasero_image_format_get_default_path (BraseroImageFormat format,
++brasero_image_format_get_default_path (BraseroImageFormat format,
+ 				       const gchar *name);
+ 
+ gchar *
+ brasero_image_format_fix_path_extension (BraseroImageFormat format,
+--- a/libbrasero-burn/brasero-image-properties.c
++++ b/libbrasero-burn/brasero-image-properties.c
+@@ -172,15 +146,19 @@ brasero_image_properties_format_changed_cb (BraseroImageTypeChooser *choos
+ 	if (!priv->edited) {
+ 		/* not changed: get a new default path */
+ 		g_free (image_path);
+-		image_path = brasero_image_properties_get_output_path (self);
++		image_path = brasero_image_format_get_default_path (format, NULL);
+ 	}
+-	else {
++	else if (image_path) {
+ 		gchar *tmp;
+ 
+ 		tmp = image_path;
+ 		image_path = brasero_image_format_fix_path_extension (format, FALSE, image_path);
+ 		g_free (tmp);
+ 	}
++	else {
++		priv->edited = FALSE;
++		image_path = brasero_image_format_get_default_path (format, NULL);
++	}
+ 
+ 	brasero_image_properties_set_path (self, image_path);
+ 
+@@ -230,7 +208,7 @@ brasero_image_properties_set_formats (BraseroImageProperties *self,
+ 		GtkWidget *label;
+ 		GtkWidget *dialog_box;
+ 
+-		box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++		box = gtk_hbox_new (FALSE, 6);
+ 		gtk_container_set_border_width (GTK_CONTAINER (box), 4);
+ 
+ 		dialog_box = gtk_dialog_get_content_area (GTK_DIALOG (self));
+--- a/libbrasero-burn/brasero-image-type-chooser.c
++++ b/libbrasero-burn/brasero-image-type-chooser.c
+@@ -43,7 +43,7 @@
+ 
+ #define BRASERO_IMAGE_TYPE_CHOOSER_PRIVATE(o)  (G_TYPE_INSTANCE_GET_PRIVATE ((o), BRASERO_TYPE_IMAGE_TYPE_CHOOSER, BraseroImageTypeChooserPrivate))
+ 
+-G_DEFINE_TYPE (BraseroImageTypeChooser, brasero_image_type_chooser, GTK_TYPE_BOX);
++G_DEFINE_TYPE (BraseroImageTypeChooser, brasero_image_type_chooser, GTK_TYPE_HBOX);
+ 
+ enum {
+ 	FORMAT_TEXT,
+@@ -67,7 +67,7 @@ struct _BraseroImageTypeChooserPrivate {
+ 	guint updating:1;
+ };
+ 
+-static GtkBoxClass *parent_class = NULL;
++static GtkHBoxClass *parent_class = NULL;
+ 
+ guint
+ brasero_image_type_chooser_set_formats (BraseroImageTypeChooser *self,
+--- a/libbrasero-burn/brasero-image-type-chooser.h
++++ b/libbrasero-burn/brasero-image-type-chooser.h
+@@ -50,11 +50,11 @@ typedef struct _BraseroImageTypeChooserPrivate BraseroImageTypeChooserPriv
+ typedef struct _BraseroImageTypeChooserClass BraseroImageTypeChooserClass;
+ 
+ struct _BraseroImageTypeChooser {
+-	GtkBox parent;
++	GtkHBox parent;
+ };
+ 
+ struct _BraseroImageTypeChooserClass {
+-	GtkBoxClass parent_class;
++	GtkHBoxClass parent_class;
+ };
+ 
+ GType brasero_image_type_chooser_get_type (void);
+--- a/libbrasero-burn/brasero-progress.c
++++ b/libbrasero-burn/brasero-progress.c
+@@ -98,7 +98,7 @@ brasero_burn_progress_get_type ()
+ 			(GInstanceInitFunc)brasero_burn_progress_init,
+ 		};
+ 
+-		type = g_type_register_static(GTK_TYPE_BOX, 
++		type = g_type_register_static(GTK_TYPE_VBOX, 
+ 					      "BraseroBurnProgress",
+ 					      &our_info,
+ 					      0);
+@@ -307,15 +307,14 @@ brasero_burn_progress_init (BraseroBurnProgress *obj)
+ 
+ 	obj->priv = g_new0 (BraseroBurnProgressPrivate, 1);
+ 	gtk_box_set_spacing (GTK_BOX (obj), 2);
+-	gtk_orientable_set_orientation (GTK_ORIENTABLE (obj), GTK_ORIENTATION_VERTICAL);
+ 
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
++	box = gtk_hbox_new (FALSE, 0);
+ 	obj->priv->progress = gtk_progress_bar_new ();
+ 	gtk_progress_bar_set_text (GTK_PROGRESS_BAR (obj->priv->progress), " ");
+ 	gtk_box_pack_start (GTK_BOX (box), obj->priv->progress, TRUE, TRUE, 0);
+ 	gtk_box_pack_start (GTK_BOX (obj), box, TRUE, TRUE, 2);
+ 
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 24);
++	box = gtk_hbox_new (FALSE, 24);
+ 	gtk_box_pack_start (GTK_BOX (obj), box, FALSE, FALSE, 0);
+ 
+ 	obj->priv->action = gtk_label_new (NULL);
+--- a/libbrasero-burn/brasero-progress.h
++++ b/libbrasero-burn/brasero-progress.h
+@@ -51,12 +51,12 @@ G_BEGIN_DECLS
+ typedef struct BraseroBurnProgressPrivate BraseroBurnProgressPrivate;
+ 
+ typedef struct {
+-	GtkBox parent;
++	GtkVBox parent;
+ 	BraseroBurnProgressPrivate *priv;
+ } BraseroBurnProgress;
+ 
+ typedef struct {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ } BraseroBurnProgressClass;
+ 
+ GType brasero_burn_progress_get_type (void);
+--- a/libbrasero-burn/brasero-src-image.c
++++ b/libbrasero-burn/brasero-src-image.c
+@@ -456,7 +456,7 @@ brasero_src_image_clicked (GtkButton *button)
+ 	gtk_file_chooser_set_filter (GTK_FILE_CHOOSER (priv->file), filter);
+ 
+ 	/* add the type chooser to the dialog */
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	box = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (box);
+ 	gtk_box_pack_end (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (priv->file))),
+ 			  box,
+@@ -564,7 +564,7 @@ brasero_src_image_init (BraseroSrcImage *object)
+ 	image = gtk_image_new_from_icon_name ("iso-image-new", GTK_ICON_SIZE_BUTTON);
+ 	gtk_widget_show (image);
+ 
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	box = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (box);
+ 	gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 0);
+ 	gtk_box_pack_start (GTK_BOX (box), label, TRUE, TRUE, 0);
+--- a/libbrasero-burn/brasero-status-dialog.c
++++ b/libbrasero-burn/brasero-status-dialog.c
+@@ -427,7 +430,7 @@ brasero_status_dialog_init (BraseroStatusDialog *object)
+ 			       GTK_STOCK_CANCEL,
+ 			       GTK_RESPONSE_CANCEL);
+ 
+-	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
++	box = gtk_vbox_new (FALSE, 4);
+ 	gtk_widget_show (box);
+ 	main_box = gtk_dialog_get_content_area (GTK_DIALOG (object));
+ 	gtk_box_pack_end (GTK_BOX (main_box),
+--- a/libbrasero-burn/brasero-sum-dialog.c
++++ b/libbrasero-burn/brasero-sum-dialog.c
+@@ -687,7 +687,7 @@ brasero_sum_dialog_init (BraseroSumDialog *obj)
+ 
+ 	priv->session = brasero_burn_session_new ();
+ 
+-	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
++	box = gtk_vbox_new (FALSE, 6);
+ 
+ 	priv->md5_check = gtk_check_button_new_with_mnemonic (_("Use an _MD5 file to check the disc"));
+ 	gtk_widget_set_tooltip_text (priv->md5_check, _("Use an external .md5 file that stores the checksum of a disc"));
+--- a/libbrasero-burn/brasero-tool-dialog.c
++++ b/libbrasero-burn/brasero-tool-dialog.c
+@@ -214,7 +214,7 @@ brasero_tool_dialog_run (BraseroToolDialog *self)
+ 	cursor = gdk_cursor_new (GDK_WATCH);
+ 	window = gtk_widget_get_window (GTK_WIDGET (self));
+ 	gdk_window_set_cursor (window, cursor);
+-	g_object_unref (cursor);
++	gdk_cursor_unref (cursor);
+ 
+ 	gtk_button_set_label (GTK_BUTTON (priv->cancel), GTK_STOCK_CANCEL);
+ 
+@@ -547,7 +530,7 @@ brasero_tool_dialog_init (BraseroToolDialog *obj)
+ 	priv = BRASERO_TOOL_DIALOG_PRIVATE (obj);
+ 
+ 	/* upper part */
+-	priv->upper_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	priv->upper_box = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (GTK_WIDGET (priv->upper_box));
+ 
+ 	priv->selector = brasero_medium_selection_new ();
+@@ -569,7 +558,7 @@ brasero_tool_dialog_init (BraseroToolDialog *obj)
+ 			    0);
+ 
+ 	/* lower part */
+-	priv->lower_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	priv->lower_box = gtk_vbox_new (FALSE, 0);
+ 	gtk_container_set_border_width (GTK_CONTAINER (priv->lower_box), 12);
+ 	gtk_widget_set_sensitive (priv->lower_box, FALSE);
+ 	gtk_widget_show (priv->lower_box);
+--- a/libbrasero-burn/brasero-video-options.c
++++ b/libbrasero-burn/brasero-video-options.c
+@@ -437,7 +441,7 @@ brasero_video_options_init (BraseroVideoOptions *object)
+ 	priv = BRASERO_VIDEO_OPTIONS_PRIVATE (object);
+ 
+ 	gtk_container_set_border_width (GTK_CONTAINER (object), 6);
+-	widget = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	widget = gtk_vbox_new (FALSE, 0);
+ 
+ 	table = gtk_table_new (3, 4, FALSE);
+ 	gtk_table_set_col_spacings (GTK_TABLE (table), 8);
+--- a/src/brasero-app.c
++++ b/src/brasero-app.c
+@@ -320,7 +320,7 @@ brasero_app_get_saved_contents (BraseroApp *app)
+  **/
+ 
+ static void
+-brasero_app_toplevel_destroyed_cb (GtkWidget *object,
++brasero_app_toplevel_destroyed_cb (GtkObject *object,
+ 				   BraseroApp *app)
+ {
+ 	BraseroAppPrivate *priv;
+@@ -512,10 +512,7 @@ brasero_app_set_parent (BraseroApp *app,
+ 	BraseroAppPrivate *priv;
+ 
+ 	priv = BRASERO_APP_PRIVATE (app);
+-#ifdef GDK_WINDOWING_X11
+-	if (GDK_IS_X11_DISPLAY (gdk_display_get_default ()))
+-		priv->parent = gdk_x11_window_foreign_new_for_display (gdk_display_get_default (), parent_xid);
+-#endif
++	priv->parent = gdk_window_foreign_new (parent_xid);
+ }
+ 
+ gboolean
+@@ -1892,7 +1896,7 @@ brasero_app_create_mainwin (BraseroApp *app)
+ 			  app);
+ 
+ 	/* contents */
+-	priv->contents = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	priv->contents = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (priv->contents);
+ 
+ 	gtk_container_add (GTK_CONTAINER (priv->mainwin), priv->contents);
+@@ -1934,13 +1938,13 @@ brasero_app_create_mainwin (BraseroApp *app)
+ 	gtk_box_pack_start (GTK_BOX (priv->contents), priv->projects, TRUE, TRUE, 0);
+ 
+ 	/* status bar to display the size of selected files */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
++	hbox = gtk_hbox_new (TRUE, 0);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_end (GTK_BOX (priv->contents), hbox, FALSE, TRUE, 0);
+ 
+ 	priv->statusbar2 = gtk_statusbar_new ();
+ 	gtk_widget_show (priv->statusbar2);
+ 	priv->tooltip_ctx = gtk_statusbar_get_context_id (GTK_STATUSBAR (priv->statusbar2), "tooltip_info");
+ 	gtk_box_pack_start (GTK_BOX (hbox), priv->statusbar2, FALSE, TRUE, 0);
+ 
+ 	priv->statusbar1 = gtk_statusbar_new ();
+--- a/src/brasero-app.h
++++ b/src/brasero-app.h
+@@ -26,6 +26,8 @@
+ #include <glib-object.h>
+ #include <gtk/gtk.h>
+ 
++
++
+ #include "brasero-session-cfg.h"
+ 
+ G_BEGIN_DECLS
+--- a/src/brasero-audio-disc.c
++++ b/src/brasero-audio-disc.c
+@@ -229,7 +229,7 @@ static void brasero_audio_disc_iface_disc_init (BraseroDiscIface *iface);
+ 
+ G_DEFINE_TYPE_WITH_CODE (BraseroAudioDisc,
+ 			 brasero_audio_disc,
+-			 GTK_TYPE_BOX,
++			 GTK_TYPE_VBOX,
+ 			 G_IMPLEMENT_INTERFACE (BRASERO_TYPE_DISC,
+ 					        brasero_audio_disc_iface_disc_init));
+ static gboolean
+--- a/src/brasero-audio-disc.h
++++ b/src/brasero-audio-disc.h
+@@ -44,12 +44,12 @@ G_BEGIN_DECLS
+ typedef struct _BraseroAudioDiscPrivate BraseroAudioDiscPrivate;
+ 
+ typedef struct {
+-	GtkBox parent;
++	GtkVBox parent;
+ 	BraseroAudioDiscPrivate *priv;
+ } BraseroAudioDisc;
+ 
+ typedef struct {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ } BraseroAudioDiscClass;
+ 
+ GType brasero_audio_disc_get_type (void);
+--- a/src/brasero-data-disc.c
++++ b/src/brasero-data-disc.c
+@@ -185,7 +185,7 @@ brasero_data_disc_iface_disc_init (BraseroDiscIface *iface);
+ 
+ G_DEFINE_TYPE_WITH_CODE (BraseroDataDisc,
+ 			 brasero_data_disc,
+-			 GTK_TYPE_BOX,
++			 GTK_TYPE_VBOX,
+ 			 G_IMPLEMENT_INTERFACE (BRASERO_TYPE_DISC,
+ 					        brasero_data_disc_iface_disc_init));
+ 
+@@ -2264,8 +2281,8 @@ brasero_data_disc_init (BraseroDataDisc *object)
+ 
+ 	gtk_box_set_spacing (GTK_BOX (object), 8);
+ 	gtk_orientable_set_orientation (GTK_ORIENTABLE (object), GTK_ORIENTATION_VERTICAL);
+ 
+-	mainbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	mainbox = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (mainbox);
+ 	gtk_box_pack_start (GTK_BOX (object), mainbox, TRUE, TRUE, 0);
+ 
+--- a/src/brasero-data-disc.h
++++ b/src/brasero-data-disc.h
+@@ -43,12 +43,12 @@ typedef struct _BraseroDataDisc BraseroDataDisc;
+ 
+ struct _BraseroDataDiscClass
+ {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ };
+ 
+ struct _BraseroDataDisc
+ {
+-	GtkBox parent_instance;
++	GtkVBox parent_instance;
+ };
+ 
+ GType brasero_data_disc_get_type (void) G_GNUC_CONST;
+--- a/src/brasero-eject-dialog.c
++++ b/src/brasero-eject-dialog.c
+@@ -170,7 +170,7 @@ brasero_eject_dialog_init (BraseroEjectDialog *obj)
+ 	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
+ 	gtk_widget_show (label);
+ 
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
++	hbox = gtk_hbox_new (FALSE, 8);
+ 	gtk_container_set_border_width (GTK_CONTAINER (hbox), 8);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, TRUE, 0);
+--- a/src/brasero-file-chooser.c
++++ b/src/brasero-file-chooser.c
+@@ -284,7 +284,7 @@ brasero_file_chooser_customize (GtkWidget *widget, gpointer null_data)
+ 			parent = gtk_widget_get_parent (widget);
+ 			gtk_widget_get_requisition (parent, &request);
+ 			width = request.width;
+-			gtk_widget_get_preferred_size (parent, &request, NULL);
++			gtk_widget_size_request (parent, &request);
+ 			if (request.width >= width)
+ 				gtk_widget_set_size_request (parent,
+ 							     request.width,
+@@ -429,10 +428,10 @@ brasero_file_chooser_find_pane (GtkWidget *child,
+ 				if (packing == GTK_PACK_START) {
+ 					GtkRequisition total_request, footer_request;
+ 
+-					gtk_widget_get_preferred_size (GTK_WIDGET (vbox),
+-								 &total_request, NULL);
+-					gtk_widget_get_preferred_size (GTK_WIDGET (iter_vbox->data),
+-								 &footer_request, NULL);
++					gtk_widget_size_request (GTK_WIDGET (vbox),
++								 &total_request);
++					gtk_widget_size_request (GTK_WIDGET (iter_vbox->data),
++								 &footer_request);
+ 					*((gint *) footer) = total_request.height - footer_request.height;
+ 					break;
+ 				}
+--- a/src/brasero-file-filtered.c
++++ b/src/brasero-file-filtered.c
+@@ -217,11 +220,11 @@ brasero_file_filtered_init (BraseroFileFiltered *object)
+ 
+ 	gtk_widget_set_tooltip_text (GTK_WIDGET (object), _("Select the files you want to restore and click on the \"Restore\" button"));
+ 
+-	mainbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 10);
++	mainbox = gtk_vbox_new (FALSE, 10);
+ 	gtk_widget_show (mainbox);
+ 	gtk_container_add (GTK_CONTAINER (object), mainbox);
+ 
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox);
+ 
+ 	priv->tree = gtk_tree_view_new ();
+@@ -285,7 +288,7 @@ brasero_file_filtered_init (BraseroFileFiltered *object)
+ 			    TRUE,
+ 			    0);
+ 
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
++	vbox = gtk_vbox_new (FALSE, 6);
+ 	gtk_widget_show (vbox);
+ 	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 0);
+ 
+--- a/src/brasero-filter-option.c
++++ b/src/brasero-filter-option.c
+@@ -43,7 +43,7 @@ struct _BraseroFilterOptionPrivate
+ 
+ #define BRASERO_FILTER_OPTION_PRIVATE(o)  (G_TYPE_INSTANCE_GET_PRIVATE ((o), BRASERO_TYPE_FILTER_OPTION, BraseroFilterOptionPrivate))
+ 
+-G_DEFINE_TYPE (BraseroFilterOption, brasero_filter_option, GTK_TYPE_BOX);
++G_DEFINE_TYPE (BraseroFilterOption, brasero_filter_option, GTK_TYPE_VBOX);
+ 
+ static void
+ brasero_filter_option_init (BraseroFilterOption *object)
+--- a/src/brasero-filter-option.h
++++ b/src/brasero-filter-option.h
+@@ -41,12 +41,12 @@ typedef struct _BraseroFilterOption BraseroFilterOption;
+ 
+ struct _BraseroFilterOptionClass
+ {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ };
+ 
+ struct _BraseroFilterOption
+ {
+-	GtkBox parent_instance;
++	GtkVBox parent_instance;
+ };
+ 
+ GType brasero_filter_option_get_type (void) G_GNUC_CONST;
+--- a/src/brasero-layout.c
++++ b/src/brasero-layout.c
+@@ -39,8 +39,8 @@
+ #include "brasero-project.h"
+ #include "brasero-uri-container.h"
+ #include "brasero-layout-object.h"
+ 
+-G_DEFINE_TYPE (BraseroLayout, brasero_layout, GTK_TYPE_BOX);
++G_DEFINE_TYPE (BraseroLayout, brasero_layout, GTK_TYPE_VBOX);
+ 
+ enum {
+ 	TEXT_COL,
+@@ -522,7 +514,7 @@ brasero_layout_add_source (BraseroLayout *layout,
+ 	GtkTreeModel *model;
+ 	BraseroLayoutItem *item;
+ 
+-	pane = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
++	pane = gtk_vbox_new (FALSE, 1);
+ 	gtk_widget_hide (pane);
+ 	gtk_box_pack_end (GTK_BOX (pane), source, TRUE, TRUE, 0);
+ 	g_signal_connect (pane,
+@@ -853,12 +843,12 @@ brasero_layout_change_type (BraseroLayout *layout,
+ 	switch (layout_type) {
+ 		case BRASERO_LAYOUT_TOP:
+ 		case BRASERO_LAYOUT_BOTTOM:
+-			layout->priv->pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
++			layout->priv->pane = gtk_vpaned_new ();
+ 			break;
+ 
+ 		case BRASERO_LAYOUT_RIGHT:
+ 		case BRASERO_LAYOUT_LEFT:
+-			layout->priv->pane = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
++			layout->priv->pane = gtk_hpaned_new ();
+ 			break;
+ 
+ 		default:
+@@ -1083,12 +1077,12 @@ brasero_layout_init (BraseroLayout *obj)
+ 	switch (obj->priv->layout_type) {
+ 		case BRASERO_LAYOUT_TOP:
+ 		case BRASERO_LAYOUT_BOTTOM:
+-			obj->priv->pane = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
++			obj->priv->pane = gtk_vpaned_new ();
+ 			break;
+ 
+ 		case BRASERO_LAYOUT_RIGHT:
+ 		case BRASERO_LAYOUT_LEFT:
+-			obj->priv->pane = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
++			obj->priv->pane = gtk_hpaned_new ();
+ 			break;
+ 
+ 		default:
+@@ -1108,13 +1102,12 @@ brasero_layout_init (BraseroLayout *obj)
+ 	gtk_action_group_add_radio_actions (obj->priv->action_group,
+ 					    radio_entries,
+ 					    sizeof (radio_entries) / sizeof (GtkRadioActionEntry),
+-					    GTK_IS_PANED (obj->priv->pane) && 
+-					    (gtk_orientable_get_orientation (GTK_ORIENTABLE (obj->priv->pane)) == GTK_ORIENTATION_VERTICAL),
++					    GTK_IS_VPANED (obj->priv->pane),
+ 					    G_CALLBACK (brasero_layout_HV_radio_button_toggled_cb),
+ 					    obj);
+ 
+ 	/* set up pane for project */
+-	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	box = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (box);
+ 
+ 	if (obj->priv->layout_type == BRASERO_LAYOUT_TOP
+@@ -1133,12 +1126,12 @@ brasero_layout_init (BraseroLayout *obj)
+ 	else
+ 		gtk_paned_pack1 (GTK_PANED (obj->priv->pane), alignment, TRUE, TRUE);
+ 
+-	obj->priv->main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	obj->priv->main_box = gtk_vbox_new (FALSE, 0);
+ 	gtk_container_add (GTK_CONTAINER (alignment), obj->priv->main_box);
+ 	gtk_widget_show (obj->priv->main_box);
+ 
+ 	/* close button and combo. Don't show it now. */
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	box = gtk_hbox_new (FALSE, 6);
+ 	obj->priv->top_box = box;
+ 	gtk_box_pack_start (GTK_BOX (obj->priv->main_box),
+ 			    box,
+--- a/src/brasero-layout.h
++++ b/src/brasero-layout.h
+@@ -55,12 +55,12 @@ typedef enum {
+ } BraseroLayoutType;
+ 
+ typedef struct {
+-	GtkPaned parent;
++	GtkHPaned parent;
+ 	BraseroLayoutPrivate *priv;
+ } BraseroLayout;
+ 
+ typedef struct {
+-	GtkPanedClass parent_class;
++	GtkHPanedClass parent_class;
+ } BraseroLayoutClass;
+ 
+ GType brasero_layout_get_type (void);
+--- a/src/brasero-multi-song-props.c
++++ b/src/brasero-multi-song-props.c
+@@ -302,7 +302,7 @@ brasero_multi_song_props_init (BraseroMultiSongProps *object)
+ 			  NULL);
+ 
+ 	/* second part of the dialog */
+-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	box = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (box);
+ 
+ 	title = g_strdup_printf ("<b>%s</b>", _("Options"));
+--- a/src/brasero-player-bacon.c
++++ b/src/brasero-player-bacon.c
+@@ -161,54 +171,46 @@ brasero_player_bacon_realize (GtkWidget *widget)
+ }
+ 
+ static gboolean
+-brasero_player_bacon_draw (GtkWidget *widget, cairo_t *cr)
++brasero_player_bacon_expose (GtkWidget *widget, GdkEventExpose *event)
+ {
+ 	BraseroPlayerBacon *bacon;
+ 	GdkWindow *window;
+ 
+ 	g_return_val_if_fail (widget != NULL, FALSE);
++	if (event && event->count > 0)
++		return TRUE;
+ 
+ 	bacon = BRASERO_PLAYER_BACON (widget);
+ 
+ 	window = gtk_widget_get_window (widget);
+ 	if (window)
+-		bacon->priv->xid = gdk_x11_window_get_xid (window);
++		bacon->priv->xid = gdk_x11_drawable_get_xid (GDK_DRAWABLE (window));
+ 
+ 	if (bacon->priv->xoverlay
+ 	&&  GST_IS_VIDEO_OVERLAY (bacon->priv->xoverlay)
+ 	&&  bacon->priv->state >= GST_STATE_PAUSED)
+ 		gst_video_overlay_expose (bacon->priv->xoverlay);
+ 	else if (window)
+-		gtk_widget_queue_draw (GTK_WIDGET (widget));
++		gdk_window_clear (window);
+ 
+ 	return TRUE;
+ }
+ 
+ static void
+-brasero_player_bacon_get_preferred_width (GtkWidget *widget,
+-                                          gint      *minimum,
+-                                          gint      *natural)
++brasero_player_bacon_size_request (GtkWidget *widget,
++				   GtkRequisition *requisition)
+ {
+-	g_return_if_fail (widget != NULL);
+-
+-	*minimum = *natural = PLAYER_BACON_WIDTH;
+-
+-	if (GTK_WIDGET_CLASS (brasero_player_bacon_parent_class)->get_preferred_width)
+-		GTK_WIDGET_CLASS (brasero_player_bacon_parent_class)->get_preferred_width (widget, minimum, natural);
+-}
++	BraseroPlayerBacon *bacon;
+ 
+-static void
+-brasero_player_bacon_get_preferred_height (GtkWidget *widget,
+-                                           gint      *minimum,
+-                                          gint      *natural)
+-{
+ 	g_return_if_fail (widget != NULL);
++	bacon = BRASERO_PLAYER_BACON (widget);
+ 
+-	*minimum = *natural = PLAYER_BACON_WIDTH;
++	requisition->width = PLAYER_BACON_WIDTH;
++	requisition->height = PLAYER_BACON_HEIGHT;
+ 
+-	if (GTK_WIDGET_CLASS (brasero_player_bacon_parent_class)->get_preferred_height)
+-		GTK_WIDGET_CLASS (brasero_player_bacon_parent_class)->get_preferred_height (widget, minimum, natural);
++	if (GTK_WIDGET_CLASS (brasero_player_bacon_parent_class)->size_request)
++		GTK_WIDGET_CLASS (brasero_player_bacon_parent_class)->size_request (widget, requisition);
+ }
+ 
+ static void
+ brasero_player_bacon_size_allocate (GtkWidget *widget,
+@@ -617,7 +619,7 @@ brasero_player_bacon_init (BraseroPlayerBacon *obj)
+ }
+ 
+ static void
+-brasero_player_bacon_destroy (GtkWidget *obj)
++brasero_player_bacon_destroy (GtkObject *obj)
+ {
+ 	BraseroPlayerBacon *cobj;
+ 
+@@ -650,8 +652,8 @@ brasero_player_bacon_destroy (GtkWidget *obj)
+ 		cobj->priv->uri = NULL;
+ 	}
+ 
+-	if (GTK_WIDGET_CLASS (brasero_player_bacon_parent_class)->destroy)
+-		GTK_WIDGET_CLASS (brasero_player_bacon_parent_class)->destroy (obj);
++	if (GTK_OBJECT_CLASS (brasero_player_bacon_parent_class)->destroy)
++		GTK_OBJECT_CLASS (brasero_player_bacon_parent_class)->destroy (obj);
+ }
+ 
+ static void
+@@ -669,18 +671,18 @@ static void
+ brasero_player_bacon_class_init (BraseroPlayerBaconClass *klass)
+ {
+ 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
++	GtkObjectClass *gtk_object_class = GTK_OBJECT_CLASS (klass);
+ 	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+ 
+ 	object_class->finalize = brasero_player_bacon_finalize;
+ 	object_class->set_property = brasero_player_bacon_set_property;
+ 	object_class->get_property = brasero_player_bacon_get_property;
++	gtk_object_class->destroy = brasero_player_bacon_destroy;
+ 
+-	widget_class->destroy = brasero_player_bacon_destroy;
+-	widget_class->draw = brasero_player_bacon_draw;
++	widget_class->expose_event = brasero_player_bacon_expose;
+ 	widget_class->realize = brasero_player_bacon_realize;
+ 	widget_class->unrealize = brasero_player_bacon_unrealize;
+-        widget_class->get_preferred_width = brasero_player_bacon_get_preferred_width;
+-        widget_class->get_preferred_height = brasero_player_bacon_get_preferred_height;
++	widget_class->size_request = brasero_player_bacon_size_request;
+ 	widget_class->size_allocate = brasero_player_bacon_size_allocate;
+ 
+ 	brasero_player_bacon_signals [STATE_CHANGED_SIGNAL] = 
+--- a/src/brasero-player.c
++++ b/src/brasero-player.c
+@@ -681,7 +681,7 @@ brasero_player_state_changed_cb (BraseroPlayerBacon *bacon,
+ }
+ 
+ static void
+-brasero_player_destroy (GtkWidget *obj)
++brasero_player_destroy (GtkObject *obj)
+ {
+ 	BraseroPlayer *player;
+ 
+@@ -716,8 +716,8 @@ brasero_player_destroy (GtkWidget *obj)
+ 		player->priv->meta_task = 0;
+ 	}
+ 
+-	if (GTK_WIDGET_CLASS (parent_class)->destroy)
+-		GTK_WIDGET_CLASS (parent_class)->destroy (obj);
++	if (GTK_OBJECT_CLASS (parent_class)->destroy)
++		GTK_OBJECT_CLASS (parent_class)->destroy (obj);
+ }
+ 
+ static void
+@@ -735,12 +735,12 @@ static void
+ brasero_player_class_init (BraseroPlayerClass *klass)
+ {
+ 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+-	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
++	GtkObjectClass *gtk_object_class = GTK_OBJECT_CLASS (klass);
+ 
+ 	parent_class = g_type_class_peek_parent (klass);
+ 	object_class->finalize = brasero_player_finalize;
+ 
+-	widget_class->destroy = brasero_player_destroy;
++	gtk_object_class->destroy = brasero_player_destroy;
+ 
+ 	brasero_player_signals [ERROR_SIGNAL] = 
+ 			g_signal_new ("error",
+@@ -785,7 +785,7 @@ brasero_player_init (BraseroPlayer *obj)
+ 
+ 	gtk_alignment_set (GTK_ALIGNMENT (obj), 0.5, 0.5, 0.0, 0.0);
+ 
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
++	vbox = gtk_vbox_new (FALSE, 2);
+ 	gtk_widget_show (vbox);
+ 	gtk_container_add (GTK_CONTAINER (obj), vbox);
+ 	
+@@ -910,7 +910,7 @@ brasero_player_init (BraseroPlayer *obj)
+ 				     obj->priv->video_height);
+ 
+ 	/* A few controls */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
++	hbox = gtk_hbox_new (FALSE, 0);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+ 
+--- a/src/brasero-playlist.c
++++ b/src/brasero-playlist.c
+@@ -96,7 +96,7 @@ static void brasero_playlist_iface_layout_object_init (BraseroLayoutObject
+ 
+ G_DEFINE_TYPE_WITH_CODE (BraseroPlaylist,
+ 			 brasero_playlist,
+-			 GTK_TYPE_BOX,
++			 GTK_TYPE_VBOX,
+ 			 G_IMPLEMENT_INTERFACE (BRASERO_TYPE_URI_CONTAINER,
+ 					        brasero_playlist_iface_uri_container_init)
+ 			 G_IMPLEMENT_INTERFACE (BRASERO_TYPE_LAYOUT_OBJECT,
+@@ -112,8 +112,8 @@ brasero_playlist_get_proportion (BraseroLayoutObject *object,
+ {
+ 	GtkRequisition requisition;
+ 
+-	gtk_widget_get_preferred_size (gtk_widget_get_parent (BRASERO_PLAYLIST (object)->priv->button_add),
+-				 &requisition, NULL);
++	gtk_widget_size_request (gtk_widget_get_parent (BRASERO_PLAYLIST (object)->priv->button_add),
++				 &requisition);
+ 	(*footer) = requisition.height + BRASERO_PLAYLIST_SPACING;
+ }
+ 
+@@ -132,7 +132,7 @@ brasero_playlist_increase_activity_counter (BraseroPlaylist *playlist)
+ 		cursor = gdk_cursor_new (GDK_WATCH);
+ 		gdk_window_set_cursor (window,
+ 				       cursor);
+-		g_object_unref (cursor);
++		gdk_cursor_unref (cursor);
+ 	}
+ 	playlist->priv->activity_counter++;
+ }
+@@ -208,9 +208,9 @@ brasero_playlist_start_search (BraseroPlaylist *playlist)
+ }
+ 
+ static gboolean
+-brasero_playlist_draw_cb (GtkWidget *widget,
+-			  cairo_t *cr,
+-			  gpointer null_data)
++brasero_playlist_expose_event_cb (GtkWidget *widget,
++				  gpointer event,
++				  gpointer null_data)
+ {
+ 	BraseroPlaylist *playlist = BRASERO_PLAYLIST (widget);
+ 
+@@ -697,8 +697,8 @@ brasero_playlist_init (BraseroPlaylist *obj)
+ 	obj->priv = g_new0 (BraseroPlaylistPrivate, 1);
+ 	gtk_box_set_spacing (GTK_BOX (obj), BRASERO_PLAYLIST_SPACING);
+ 	gtk_orientable_set_orientation (GTK_ORIENTABLE (obj), GTK_ORIENTATION_VERTICAL);
+ 
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
++	hbox = gtk_hbox_new (FALSE, 8);
+ 	gtk_widget_show (hbox);
+ 
+ 	obj->priv->button_add = gtk_button_new_from_stock (GTK_STOCK_ADD);
+@@ -841,7 +840,7 @@ brasero_playlist_init (BraseroPlaylist *obj)
+ }
+ 
+ static void
+-brasero_playlist_destroy (GtkWidget *object)
++brasero_playlist_destroy (GtkObject *object)
+ {
+ 	BraseroPlaylist *playlist = BRASERO_PLAYLIST (object);
+ 
+@@ -864,8 +863,8 @@ brasero_playlist_destroy (GtkWidget *object)
+ 		playlist->priv->parse_type = NULL;
+ 	}
+ 
+-	if (GTK_WIDGET_CLASS (brasero_playlist_parent_class)->destroy)
+-		GTK_WIDGET_CLASS (brasero_playlist_parent_class)->destroy (object);
++	if (GTK_OBJECT_CLASS (brasero_playlist_parent_class)->destroy)
++		GTK_OBJECT_CLASS (brasero_playlist_parent_class)->destroy (object);
+ }
+ 
+ static void
+@@ -884,10 +883,10 @@ static void
+ brasero_playlist_class_init (BraseroPlaylistClass *klass)
+ {
+ 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+-	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
++	GtkObjectClass *gtkobject_class = GTK_OBJECT_CLASS (klass);
+ 
+ 	object_class->finalize = brasero_playlist_finalize;
+-	widget_class->destroy = brasero_playlist_destroy;
++	gtkobject_class->destroy = brasero_playlist_destroy;
+ }
+ 
+ static void
+@@ -911,8 +910,8 @@ brasero_playlist_new ()
+ 	obj = BRASERO_PLAYLIST (g_object_new (BRASERO_TYPE_PLAYLIST, NULL));
+ 
+ 	g_signal_connect (obj,
+-			  "draw",
+-			  G_CALLBACK (brasero_playlist_draw_cb),
++			  "expose-event",
++			  G_CALLBACK (brasero_playlist_expose_event_cb),
+ 			  NULL);
+ 
+ 	return GTK_WIDGET (obj);
+--- a/src/brasero-playlist.h
++++ b/src/brasero-playlist.h
+@@ -47,12 +47,12 @@ G_BEGIN_DECLS
+ typedef struct BraseroPlaylistPrivate BraseroPlaylistPrivate;
+ 
+ typedef struct {
+-	GtkBox parent;
++	GtkVBox parent;
+ 	BraseroPlaylistPrivate *priv;
+ } BraseroPlaylist;
+ 
+ typedef struct {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ } BraseroPlaylistClass;
+ 
+ GType brasero_playlist_get_type (void);
+--- a/src/brasero-plugin-manager-ui.c
++++ b/src/brasero-plugin-manager-ui.c
+@@ -78,7 +78,7 @@ struct _BraseroPluginManagerUIPrivate
+ 	GSList		*plugins;
+ };
+ 
+-G_DEFINE_TYPE (BraseroPluginManagerUI, brasero_plugin_manager_ui, GTK_TYPE_BOX)
++G_DEFINE_TYPE (BraseroPluginManagerUI, brasero_plugin_manager_ui, GTK_TYPE_VBOX)
+ 
+ static void plugin_manager_ui_toggle_active (GtkTreeIter *iter, GtkTreeModel *model); 
+ static void brasero_plugin_manager_ui_finalize (GObject *object);
+@@ -639,7 +651,7 @@ menu_position_under_widget (GtkMenu  *menu,
+ 	GtkAllocation allocation;
+ 
+ 	gdk_window_get_origin (gtk_widget_get_window (w), x, y);
+-	gtk_widget_get_preferred_size (GTK_WIDGET (menu), &requisition, NULL);
++	gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+ 
+ 	gtk_widget_get_allocation (w, &allocation);
+ 	if (gtk_widget_get_direction (w) == GTK_TEXT_DIR_RTL) {
+@@ -693,7 +705,7 @@ menu_position_under_tree_view (GtkMenu  *menu,
+ 		if (gtk_widget_get_direction (GTK_WIDGET (tree)) == GTK_TEXT_DIR_RTL) {
+ 			GtkRequisition requisition;
+ 
+-			gtk_widget_get_preferred_size (GTK_WIDGET (menu), &requisition, NULL);
++			gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+ 
+ 			*x += rect.width - requisition.width;
+ 		}
+@@ -926,7 +938,6 @@ brasero_plugin_manager_ui_init (BraseroPluginManagerUI *pm)
+ 
+ 	priv = BRASERO_PLUGIN_MANAGER_UI_GET_PRIVATE (pm);
+ 
+-	gtk_orientable_set_orientation (GTK_ORIENTABLE (pm), GTK_ORIENTATION_VERTICAL);
+ 	gtk_box_set_spacing (GTK_BOX (pm), 6);
+ 	gtk_container_set_border_width (GTK_CONTAINER (pm), 12);
+ 
+@@ -934,12 +945,12 @@ brasero_plugin_manager_ui_init (BraseroPluginManagerUI *pm)
+ 	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 0, 0, 12, 0);
+ 	gtk_box_pack_start (GTK_BOX (pm), alignment, TRUE, TRUE, 0);
+  	
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	vbox = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (vbox);
+ 	gtk_container_add (GTK_CONTAINER (alignment), vbox);
+ 
+ 	/* bottom part: tree, buttons */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
++	hbox = gtk_hbox_new (FALSE, 12);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 6);
+ 
+@@ -955,7 +966,7 @@ brasero_plugin_manager_ui_init (BraseroPluginManagerUI *pm)
+ 	priv->tree = gtk_tree_view_new ();
+ 	gtk_container_add (GTK_CONTAINER (viewport), priv->tree);
+ 
+-	vbuttonbox = gtk_button_box_new (GTK_ORIENTATION_VERTICAL);
++	vbuttonbox = gtk_vbutton_box_new ();
+ 	gtk_box_pack_start (GTK_BOX (hbox), vbuttonbox, FALSE, FALSE, 0);
+ 	gtk_button_box_set_layout (GTK_BUTTON_BOX (vbuttonbox), GTK_BUTTONBOX_START);
+ 	gtk_box_set_spacing (GTK_BOX (vbuttonbox), 8);
+--- a/src/brasero-plugin-manager-ui.h
++++ b/src/brasero-plugin-manager-ui.h
+@@ -52,7 +52,7 @@ typedef struct _BraseroPluginManagerUI BraseroPluginManagerUI;
+ 
+ struct _BraseroPluginManagerUI 
+ {
+-	GtkBox vbox;
++	GtkVBox vbox;
+ };
+ 
+ /*
+@@ -62,7 +62,7 @@ typedef struct _BraseroPluginManagerUIClass BraseroPluginManagerUIClass;
+ 
+ struct _BraseroPluginManagerUIClass 
+ {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ };
+ 
+ /*
+--- a/src/brasero-plugin-option.c
++++ b/src/brasero-plugin-option.c
+@@ -80,7 +80,7 @@ brasero_plugin_option_add_conf_widget (BraseroPluginOption *self,
+ 					     &description,
+ 					     &type);
+ 
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
++	hbox = gtk_hbox_new (FALSE, 0);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_start (container, hbox, FALSE, FALSE, 0);
+ 
+@@ -100,7 +100,7 @@ brasero_plugin_option_add_conf_widget (BraseroPluginOption *self,
+ 
+ 		suboptions = brasero_plugin_conf_option_bool_get_suboptions (option);
+ 		if (suboptions) {
+-			box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++			box = gtk_vbox_new (FALSE, 0);
+ 			gtk_widget_show (box);
+ 
+ 			gtk_box_pack_start (GTK_BOX (box),
+@@ -136,7 +136,7 @@ brasero_plugin_option_add_conf_widget (BraseroPluginOption *self,
+ 		break;
+ 
+ 	case BRASERO_PLUGIN_OPTION_INT:
+-		box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++		box = gtk_hbox_new (FALSE, 6);
+ 
+ 		label = gtk_label_new (description);
+ 		gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
+@@ -160,7 +160,7 @@ brasero_plugin_option_add_conf_widget (BraseroPluginOption *self,
+ 		break;
+ 
+ 	case BRASERO_PLUGIN_OPTION_STRING:
+-		box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++		box = gtk_hbox_new (FALSE, 6);
+ 
+ 		label = gtk_label_new (description);
+ 		gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
+@@ -182,7 +182,7 @@ brasero_plugin_option_add_conf_widget (BraseroPluginOption *self,
+ 		break;
+ 
+ 	case BRASERO_PLUGIN_OPTION_CHOICE:
+-		box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++		box = gtk_hbox_new (FALSE, 6);
+ 
+ 		label = gtk_label_new (description);
+ 		gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
+@@ -285,7 +285,7 @@ brasero_plugin_option_init (BraseroPluginOption *object)
+ 	priv->title = gtk_frame_get_label_widget (GTK_FRAME (frame));
+ 	gtk_label_set_use_markup (GTK_LABEL (priv->title), TRUE);
+ 
+-	priv->vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	priv->vbox = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (priv->vbox);
+ 	gtk_container_set_border_width (GTK_CONTAINER (priv->vbox), 8);
+ 	gtk_container_add (GTK_CONTAINER (frame), priv->vbox);
+--- a/src/brasero-project-type-chooser.c
++++ b/src/brasero-project-type-chooser.c
+@@ -36,15 +36,13 @@
+ 
+ #include <gtk/gtk.h>
+ 
+-#include <cairo/cairo.h>
+-
+ #include "brasero-app.h"
+ #include "brasero-utils.h"
+ #include "brasero-session.h"
+ 
+ #include "brasero-project-type-chooser.h"
+ 
+-G_DEFINE_TYPE (BraseroProjectTypeChooser, brasero_project_type_chooser, GTK_TYPE_BOX);
++G_DEFINE_TYPE (BraseroProjectTypeChooser, brasero_project_type_chooser, GTK_TYPE_EVENT_BOX);
+ 
+ typedef enum {
+ 	LAST_SAVED_CLICKED_SIGNAL,
+@@ -103,6 +101,7 @@ static ItemDescription items [] = {
+ #define LABEL_KEY "LABEL_KEY"
+ 
+ struct BraseroProjectTypeChooserPrivate {
++	GdkPixbuf *background;
+ 	GtkWidget *recent_box;
+ };
+ 
+@@ -149,18 +148,18 @@ brasero_project_type_chooser_new_item (BraseroProjectTypeChooser *chooser,
+ 			   DESCRIPTION_KEY,
+ 			   description);
+ 
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	vbox = gtk_vbox_new (FALSE, 0);
+ 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 4);
+ 	gtk_container_add (GTK_CONTAINER (eventbox), vbox);
+ 
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
++	hbox = gtk_hbox_new (FALSE, 4);
+ 	gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, FALSE, 0);
+ 
+ 	image = gtk_image_new_from_icon_name (description->image, GTK_ICON_SIZE_DIALOG);
+ 	gtk_misc_set_alignment (GTK_MISC (image), 1.0, 0.5);
+ 	gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
+ 
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
++	vbox = gtk_vbox_new (TRUE, 4);
+ 	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, TRUE, 0);
+ 
+ 	label = gtk_label_new (NULL);
+@@ -315,7 +315,7 @@ brasero_project_type_chooser_build_recent (BraseroProjectTypeChooser *self
+ 		GtkRecentInfo *info;
+ 		GList *child_iter;
+ 		const gchar *name;
+-		GIcon *icon;
++		GdkPixbuf *pixbuf;
+ 		GtkWidget *image;
+ 		const gchar *uri;
+ 		GtkWidget *child;
+@@ -327,9 +327,9 @@ brasero_project_type_chooser_build_recent (BraseroProjectTypeChooser *self
+ 
+ 		tooltip = gtk_recent_info_get_uri_display (info);
+ 
+-		icon = gtk_recent_info_get_gicon (info);
+-		image = gtk_image_new_from_gicon (icon, GTK_ICON_SIZE_BUTTON);
+-		g_object_unref (icon);
++		pixbuf = gtk_recent_info_get_icon (info, GTK_ICON_SIZE_BUTTON);
++		image = gtk_image_new_from_pixbuf (pixbuf);
++		g_object_unref (pixbuf);
+ 		gtk_size_group_add_widget (image_group, image);
+ 
+ 		gtk_widget_show (image);
+@@ -442,6 +441,7 @@ brasero_project_type_chooser_init (BraseroProjectTypeChooser *obj)
+ 	GtkRecentManager *recent;
+ 	GtkWidget *project_box;
+ 	GtkWidget *recent_box;
++	GError *error = NULL;
+ 	GtkWidget *separator;
+ 	GtkWidget *widget;
+ 	GtkWidget *table;
+@@ -455,10 +455,22 @@ brasero_project_type_chooser_init (BraseroProjectTypeChooser *obj)
+ 
+ 	obj->priv = g_new0 (BraseroProjectTypeChooserPrivate, 1);
+ 
++	obj->priv->background = gdk_pixbuf_new_from_file (BRASERO_DATADIR "/logo.png", &error);
++	if (error) {
++		g_warning ("ERROR loading background pix : %s\n", error->message);
++		g_error_free (error);
++		error = NULL;
++	}
++
++	vbox = gtk_hbox_new (FALSE, 0);
++	gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
++	gtk_widget_show (vbox);
++	gtk_container_add (GTK_CONTAINER (obj), vbox);
++
+ 	/* Project box */
+-	project_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
++	project_box = gtk_vbox_new (FALSE, 6);
+ 	gtk_widget_show (project_box);
+-	gtk_box_pack_start (GTK_BOX (obj), project_box, FALSE, TRUE, 0);
++	gtk_box_pack_start (GTK_BOX (vbox), project_box, FALSE, TRUE, 0);
+ 
+ 	string = g_strdup_printf ("<span size='x-large'><b>%s</b></span>", _("Create a new project:"));
+ 	label = gtk_label_new (string);
+@@ -467,7 +479,6 @@ brasero_project_type_chooser_init (BraseroProjectTypeChooser *obj)
+ 	gtk_widget_show (label);
+ 	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
+ 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+-	gtk_misc_set_padding (GTK_MISC (label), 6.0, 0.0);
+ 	gtk_box_pack_start (GTK_BOX (project_box), label, FALSE, TRUE, 0);
+ 
+ 	/* get the number of rows */
+@@ -498,14 +509,14 @@ brasero_project_type_chooser_init (BraseroProjectTypeChooser *obj)
+ 	}
+ 	gtk_widget_show_all (table);
+ 
+-	separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
++	separator = gtk_vseparator_new ();
+ 	gtk_widget_show (separator);
+-	gtk_box_pack_start (GTK_BOX (obj), separator, FALSE, TRUE, 2);
++	gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, TRUE, 8);
+ 
+ 	/* The recent files part */
+-	recent_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	recent_box = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (recent_box);
+-	gtk_box_pack_start (GTK_BOX (obj), recent_box, TRUE, TRUE, 0);
++	gtk_box_pack_start (GTK_BOX (vbox), recent_box, TRUE, TRUE, 0);
+ 
+ 	string = g_strdup_printf ("<span size='x-large'><b>%s</b></span>", _("Recent projects:"));
+ 	label = gtk_label_new (string);
+@@ -514,13 +525,12 @@ brasero_project_type_chooser_init (BraseroProjectTypeChooser *obj)
+ 	gtk_widget_show (label);
+ 	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
+ 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+-	gtk_misc_set_padding (GTK_MISC (label), 6.0, 0.0);
+ 	gtk_box_pack_start (GTK_BOX (recent_box), label, FALSE, TRUE, 0);
+ 
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	vbox = gtk_vbox_new (TRUE, 0);
+ 	gtk_widget_show (vbox);
+ 	gtk_box_pack_start (GTK_BOX (recent_box), vbox, FALSE, TRUE, 0);
+-	gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
++	gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
+ 	obj->priv->recent_box = vbox;
+ 
+ 	recent = gtk_recent_manager_get_default ();
+@@ -532,6 +542,41 @@ brasero_project_type_chooser_init (BraseroProjectTypeChooser *obj)
+ 			  obj);
+ }
+ 
++/* Cut and Pasted from Gtk+ gtkeventbox.c but modified to display back image */
++static gboolean
++brasero_project_type_expose_event (GtkWidget *widget, GdkEventExpose *event)
++{
++	BraseroProjectTypeChooser *chooser;
++
++	chooser = BRASERO_PROJECT_TYPE_CHOOSER (widget);
++
++	if (gtk_widget_is_drawable (widget))
++	{
++		(* GTK_WIDGET_CLASS (parent_class)->expose_event) (widget, event);
++
++		if (gtk_widget_get_has_window (widget)) {
++			if (!gtk_widget_get_app_paintable (widget)
++			&&  chooser->priv->background) {
++				int width, height, offset = 150;
++				cairo_t *ctx;
++
++				width = gdk_pixbuf_get_width (chooser->priv->background);
++				height = gdk_pixbuf_get_height (chooser->priv->background);
++				ctx = gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget)));
++				cairo_rectangle (ctx, 0, 0, width - offset, height);
++				cairo_clip (ctx);
++				gdk_cairo_set_source_pixbuf (ctx,
++					                     chooser->priv->background,
++					                     0, 0);
++				cairo_paint (ctx);
++				cairo_destroy (ctx);
++			}
++		}
++	}
++
++	return FALSE;
++}
++
+ static void
+ brasero_project_type_chooser_finalize (GObject *object)
+ {
+@@ -539,6 +584,11 @@ brasero_project_type_chooser_finalize (GObject *object)
+ 
+ 	cobj = BRASERO_PROJECT_TYPE_CHOOSER (object);
+ 
++	if (cobj->priv->background) {
++		g_object_unref (G_OBJECT (cobj->priv->background));
++		cobj->priv->background = NULL;
++	}
++
+ 	g_free (cobj->priv);
+ 	G_OBJECT_CLASS (parent_class)->finalize (object);
+ }
+@@ -547,9 +597,11 @@ static void
+ brasero_project_type_chooser_class_init (BraseroProjectTypeChooserClass *klass)
+ {
+ 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
++	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+ 
+ 	parent_class = g_type_class_peek_parent (klass);
+ 	object_class->finalize = brasero_project_type_chooser_finalize;
++	widget_class->expose_event = brasero_project_type_expose_event;
+ 
+ 	brasero_project_type_chooser_signals[CHOSEN_SIGNAL] =
+ 	    g_signal_new ("chosen", G_OBJECT_CLASS_TYPE (object_class),
+--- a/src/brasero-project-type-chooser.h
++++ b/src/brasero-project-type-chooser.h
+@@ -46,12 +46,12 @@ G_BEGIN_DECLS
+ typedef struct BraseroProjectTypeChooserPrivate BraseroProjectTypeChooserPrivate;
+ 
+ typedef struct {
+-	GtkBox parent;
++	GtkEventBox parent;
+ 	BraseroProjectTypeChooserPrivate *priv;
+ } BraseroProjectTypeChooser;
+ 
+ typedef struct {
+-	GtkBoxClass parent_class;
++	GtkEventBoxClass parent_class;
+ 
+ 	void	(*last_saved_clicked)	(BraseroProjectTypeChooser *chooser,
+ 					 const gchar *path);
+--- a/src/brasero-project.c
++++ b/src/brasero-project.c
+@@ -297,7 +295,7 @@ brasero_project_get_type ()
+ 			NULL
+ 		};
+ 
+-		type = g_type_register_static (GTK_TYPE_BOX, 
++		type = g_type_register_static (GTK_TYPE_VBOX, 
+ 					       "BraseroProject",
+ 					       &our_info, 0);
+ 
+@@ -590,24 +588,18 @@ brasero_utils_disc_style_changed_cb (GtkWidget *widget,
+ 				     GtkStyle *previous,
+ 				     GtkWidget *event_box)
+ {
+-	GdkRGBA color;
+-
+ 	/* The widget (a treeview here) needs to be realized to get proper style */
+ 	gtk_widget_realize (widget);
+-	gdk_rgba_parse (&color, "white");
+-	gtk_widget_override_background_color (event_box, GTK_STATE_NORMAL, &color);
++	gtk_widget_modify_bg (event_box, GTK_STATE_NORMAL, &gtk_widget_get_style (widget)->base[GTK_STATE_NORMAL]);
+ }
+ 
+ static void
+ brasero_utils_disc_realized_cb (GtkWidget *event_box,
+ 				GtkWidget *textview)
+ {
+-	GdkRGBA color;
+-
+ 	/* The widget (a treeview here) needs to be realized to get proper style */
+ 	gtk_widget_realize (textview);
+-	gdk_rgba_parse (&color, "white");
+-	gtk_widget_override_background_color (event_box, GTK_STATE_NORMAL, &color);
++	gtk_widget_modify_bg (event_box, GTK_STATE_NORMAL, &gtk_widget_get_style (textview)->base[GTK_STATE_NORMAL]);
+ 
+ 	g_signal_handlers_disconnect_by_func (textview,
+ 					      brasero_utils_disc_style_changed_cb,
+@@ -897,7 +889,7 @@ brasero_project_is_valid (BraseroSessionCfg *session,
+ 		||  brasero_status_get_result (status) == BRASERO_BURN_RUNNING) {
+ 			cursor = gdk_cursor_new (GDK_WATCH);
+ 			gdk_window_set_cursor (window, cursor);
+-			g_object_unref (cursor);
++			gdk_cursor_unref (cursor);
+ 		}
+ 		else
+ 			gdk_window_set_cursor (window, NULL);
+@@ -1328,7 +1318,7 @@ brasero_project_install_missing (BraseroPluginErrorType type,
+ 
+ 	/* Get the xid */
+ 	parent = gtk_widget_get_toplevel (GTK_WIDGET (project));
+-	xid = gdk_x11_window_get_xid (gtk_widget_get_window (parent));
++	xid = gdk_x11_drawable_get_xid (GDK_DRAWABLE (gtk_widget_get_window (parent)));
+ 
+ 	package = brasero_pk_new ();
+ 	cancel = g_cancellable_new ();
+@@ -2358,11 +2345,7 @@ brasero_project_register_ui (BraseroProject *project, GtkUIManager *manage
+ 		g_message ("building menus/toolbar failed: %s", error->message);
+ 		g_error_free (error);
+ 	}
+-
+-	toolbar = gtk_ui_manager_get_widget (manager, "/Toolbar");
+-	gtk_style_context_add_class (gtk_widget_get_style_context (toolbar),
+-				     GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+-
++	
+ 	action = gtk_action_group_get_action (project->priv->project_group, "Save");
+ 	g_object_set (action,
+ 		      "short-label", _("_Save"), /* for toolbar buttons */
+--- a/src/brasero-project.h
++++ b/src/brasero-project.h
+@@ -53,12 +53,12 @@ G_BEGIN_DECLS
+ typedef struct BraseroProjectPrivate BraseroProjectPrivate;
+ 
+ typedef struct {
+-	GtkBox parent;
++	GtkVBox parent;
+ 	BraseroProjectPrivate *priv;
+ } BraseroProject;
+ 
+ typedef struct {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ 
+ 	void	(*add_pressed)	(BraseroProject *project);
+ } BraseroProjectClass;
+--- a/src/brasero-rename.c
++++ b/src/brasero-rename.c
+@@ -59,7 +59,7 @@ struct _BraseroRenamePrivate
+ 
+ 
+ 
+-G_DEFINE_TYPE (BraseroRename, brasero_rename, GTK_TYPE_BOX);
++G_DEFINE_TYPE (BraseroRename, brasero_rename, GTK_TYPE_VBOX);
+ 
+ void
+ brasero_rename_set_show_keep_default (BraseroRename *self,
+@@ -333,7 +331,7 @@ brasero_rename_init (BraseroRename *object)
+ 	gtk_combo_box_set_active (GTK_COMBO_BOX (priv->combo), 0);
+ 
+ 	/* Insert */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox);
+ 	gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), hbox, NULL);
+ 
+@@ -353,7 +351,7 @@ brasero_rename_init (BraseroRename *object)
+ 	priv->insert_combo = combo;
+ 
+ 	/* Delete */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox);
+ 	gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), hbox, NULL);
+ 
+@@ -377,7 +375,7 @@ brasero_rename_init (BraseroRename *object)
+ 	priv->delete_entry = entry;
+ 
+ 	/* Substitution */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox);
+ 	gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), hbox, NULL);
+ 
+@@ -407,7 +405,7 @@ brasero_rename_init (BraseroRename *object)
+ 	priv->joker_entry = entry;
+ 
+ 	/* Pattern */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox);
+ 	gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), hbox, NULL);
+ 
+--- a/src/brasero-rename.h
++++ b/src/brasero-rename.h
+@@ -47,12 +47,12 @@ typedef struct _BraseroRename BraseroRename;
+ 
+ struct _BraseroRenameClass
+ {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ };
+ 
+ struct _BraseroRename
+ {
+-	GtkBox parent_instance;
++	GtkVBox parent_instance;
+ };
+ 
+ GType brasero_rename_get_type (void) G_GNUC_CONST;
+--- a/src/brasero-song-control.c
++++ b/src/brasero-song-control.c
+@@ -440,7 +444,7 @@ brasero_song_control_bus_messages (GstBus *bus,
+ }
+ 
+ static void
+-brasero_song_control_destroy (GtkWidget *obj)
++brasero_song_control_destroy (GtkObject *obj)
+ {
+ 	BraseroSongControlPrivate *priv;
+ 
+@@ -471,7 +475,7 @@ brasero_song_control_destroy (GtkWidget *obj)
+ 		priv->uri = NULL;
+ 	}
+ 
+-	GTK_WIDGET_CLASS (brasero_song_control_parent_class)->destroy (obj);
++	GTK_OBJECT_CLASS (brasero_song_control_parent_class)->destroy (obj);
+ }
+ 
+ static void
+@@ -510,13 +514,13 @@ brasero_song_control_init (BraseroSongControl *object)
+ 	gst_object_unref (bus);
+ 
+ 	/* Widget itself */
+-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	vbox = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (vbox);
+ 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+ 	gtk_container_add (GTK_CONTAINER (object), vbox);
+ 
+ 	/* first line title */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
++	hbox = gtk_hbox_new (FALSE, 12);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_start (GTK_BOX (vbox),
+ 			    hbox,
+@@ -546,7 +550,7 @@ brasero_song_control_init (BraseroSongControl *object)
+ 	                  0);
+ 	
+ 	/* second line : play, progress, volume button */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
++	hbox = gtk_hbox_new (FALSE, 12);
+ 	gtk_widget_show (hbox);
+ 	gtk_box_pack_start (GTK_BOX (vbox),
+ 			    hbox,
+@@ -574,11 +578,12 @@ brasero_song_control_init (BraseroSongControl *object)
+ 			  G_CALLBACK (brasero_song_control_button_clicked_cb),
+ 			  object);
+ 
+-	priv->progress = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 0, 1, 500000000);
++	priv->progress = gtk_hscale_new_with_range (0, 1, 500000000);
+ 	gtk_widget_show (priv->progress);
+ 	gtk_scale_set_digits (GTK_SCALE (priv->progress), 0);
+ 	gtk_scale_set_draw_value (GTK_SCALE (priv->progress), FALSE);
+ 	gtk_widget_set_size_request (priv->progress, 80, -1);
++	gtk_range_set_update_policy (GTK_RANGE (priv->progress), GTK_UPDATE_CONTINUOUS);
+ 	gtk_box_pack_start (GTK_BOX (hbox),
+ 	                    priv->progress,
+ 	                    TRUE,
+@@ -633,12 +638,12 @@ static void
+ brasero_song_control_class_init (BraseroSongControlClass *klass)
+ {
+ 	GObjectClass* object_class = G_OBJECT_CLASS (klass);
+-	GtkWidgetClass* gtk_widget_class = GTK_WIDGET_CLASS (klass);
++	GtkObjectClass* gtk_object_class = GTK_OBJECT_CLASS (klass);
+ 
+ 	g_type_class_add_private (klass, sizeof (BraseroSongControlPrivate));
+ 
+ 	object_class->finalize = brasero_song_control_finalize;
+-	gtk_widget_class->destroy = brasero_song_control_destroy;
++	gtk_object_class->destroy = brasero_song_control_destroy;
+ }
+ 
+ GtkWidget *
+--- a/src/brasero-split-dialog.c
++++ b/src/brasero-split-dialog.c
+@@ -1064,10 +1062,10 @@ brasero_split_dialog_init (BraseroSplitDialog *object)
+ 	size_group = gtk_size_group_new (GTK_SIZE_GROUP_BOTH);
+ 
+ 	/* Slicing method */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox);
+ 
+ 	priv->combo = gtk_combo_box_text_new ();
+ 
+ 	label = gtk_label_new_with_mnemonic (_("M_ethod:"));
+ 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+@@ -1110,7 +1108,7 @@ brasero_split_dialog_init (BraseroSplitDialog *object)
+ 	gtk_widget_show (priv->player);
+ 	gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), priv->player, NULL);
+ 
+-	hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox2 = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox2);
+ 	gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), hbox2, NULL);
+ 
+@@ -1128,7 +1126,7 @@ brasero_split_dialog_init (BraseroSplitDialog *object)
+ 	gtk_widget_show (label);
+ 	gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
+ 
+-	hbox2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox2 = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox2);
+ 	gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), hbox2, NULL);
+ 
+@@ -1162,7 +1160,7 @@ brasero_split_dialog_init (BraseroSplitDialog *object)
+ 	g_free (title);
+ 
+ 	/* slices preview */
+-	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
++	hbox = gtk_hbox_new (FALSE, 6);
+ 	gtk_widget_show (hbox);
+ 
+ 	priv->model = gtk_list_store_new (COLUMN_NUM,
+@@ -1234,7 +1232,7 @@ brasero_split_dialog_init (BraseroSplitDialog *object)
+ 			  object);
+ 
+ 	/* buttons */
+-	vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
++	vbox2 = gtk_vbox_new (FALSE, 6);
+ 	gtk_widget_show (vbox2);
+ 	gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, TRUE, 0);
+ 
+@@ -1284,7 +1282,7 @@ brasero_split_dialog_init (BraseroSplitDialog *object)
+ 	gtk_widget_set_sensitive (priv->merge_button, FALSE);
+ 	gtk_widget_set_sensitive (priv->remove_button, FALSE);
+ 
+-	vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
++	vbox2 = gtk_vbox_new (FALSE, 6);
+ 	gtk_widget_show (vbox2);
+ 
+ 	label = gtk_label_new_with_mnemonic (_("_List of slices that are to be created:"));
+--- a/src/brasero-time-button.c
++++ b/src/brasero-time-button.c
+@@ -55,7 +55,7 @@ enum
+ };
+ static guint time_button_signals [LAST_SIGNAL] = { 0 };
+ 
+-G_DEFINE_TYPE (BraseroTimeButton, brasero_time_button, GTK_TYPE_BOX);
++G_DEFINE_TYPE (BraseroTimeButton, brasero_time_button, GTK_TYPE_HBOX);
+ 
+ static void
+ brasero_time_button_hrs_changed (GtkSpinButton *button,
+--- a/src/brasero-time-button.h
++++ b/src/brasero-time-button.h
+@@ -41,14 +41,14 @@ typedef struct _BraseroTimeButton BraseroTimeButton;
+ 
+ struct _BraseroTimeButtonClass
+ {
+-	GtkBoxClass parent_class;
++	GtkHBoxClass parent_class;
+ 
+ 	void		(*value_changed)	(BraseroTimeButton *self);
+ };
+ 
+ struct _BraseroTimeButton
+ {
+-	GtkBox parent_instance;
++	GtkHBox parent_instance;
+ };
+ 
+ GType brasero_time_button_get_type (void) G_GNUC_CONST;
+--- a/src/brasero-video-disc.c
++++ b/src/brasero-video-disc.c
+@@ -74,7 +74,7 @@ brasero_video_disc_iface_disc_init (BraseroDiscIface *iface);
+ 
+ G_DEFINE_TYPE_WITH_CODE (BraseroVideoDisc,
+ 			 brasero_video_disc,
+-			 GTK_TYPE_BOX,
++			 GTK_TYPE_VBOX,
+ 			 G_IMPLEMENT_INTERFACE (BRASERO_TYPE_DISC,
+ 					        brasero_video_disc_iface_disc_init));
+ 
+@@ -1155,9 +1164,9 @@ brasero_video_disc_init (BraseroVideoDisc *object)
+ 
+ 	priv = BRASERO_VIDEO_DISC_PRIVATE (object);
+ 
+ 	gtk_orientable_set_orientation (GTK_ORIENTABLE (object), GTK_ORIENTATION_VERTICAL);
+ 
+-	mainbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
++	mainbox = gtk_vbox_new (FALSE, 0);
+ 	gtk_widget_show (mainbox);
+ 	gtk_box_pack_start (GTK_BOX (object), mainbox, TRUE, TRUE, 0);
+ 
+--- a/src/brasero-video-disc.h
++++ b/src/brasero-video-disc.h
+@@ -41,12 +41,12 @@ typedef struct _BraseroVideoDisc BraseroVideoDisc;
+ 
+ struct _BraseroVideoDiscClass
+ {
+-	GtkBoxClass parent_class;
++	GtkVBoxClass parent_class;
+ };
+ 
+ struct _BraseroVideoDisc
+ {
+-	GtkBox parent_instance;
++	GtkVBox parent_instance;
+ };
+ 
+ GType brasero_video_disc_get_type (void) G_GNUC_CONST;
